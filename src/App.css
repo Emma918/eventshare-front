@@ -77,7 +77,7 @@ body {
   font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
-  background-image: url('C:\EventShare\eventshare-front\public\background.jpg'); /* Add your image path here */
+  background-image: url('../public/background.jpg'); /* Add your image path here */
   background-size: cover; /* Adjust the size to cover the entire screen */
   background-attachment: fixed; /* Make the background fixed to create the parallax effect */
   background-position: center; /* Center the image */

@@ -1,0 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1000px; /* Adjust this value to make the page narrower */
+  margin: 0 auto;
+  padding: 20px; /* Optional: adds some padding inside the container */
+  background-color: #f4f4f4;
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.btn-custom {
+  background-color: #f0f0f0;  /* Light gray background */
+  color: #000;  /* Black text */
+  margin-bottom: 16px;  /* Spacing from the bottom */
+}
+
+.btn-custom:hover {
+  background-color: #e0e0e0;  /* Slightly darker gray on hover */
+}
+
+.btn-spacing {
+  margin-right: 8px;  /* Add spacing between the buttons */
+}
+.search-input {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 25px;  /* Fully rounded corners */
+  min-width: 300px;  /* Adjust width */
+  height: 48px;
+}
+
+.magnifying-icon {
+  color: #1976d2;  /* Adjust magnifying glass color */
+}
+.user-name {
+  margin-right: 8px;
+  color: #fff;
+}
+body {
+  background-color: #f5f7fa;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-image: url('C:\EventShare\eventshare-front\public\background.jpg'); /* Add your image path here */
+  background-size: cover; /* Adjust the size to cover the entire screen */
+  background-attachment: fixed; /* Make the background fixed to create the parallax effect */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent the background from repeating */
+}
+
+.app-bar {
+  background-color: #1e1e1e;
+}
+
+.button-primary {
+  background: linear-gradient(135deg, #6E45E2 0%, #88D3CE 100%);
+  color: #fff;
+  border-radius: 30px;
+}
+/* Container for the card grid */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  /*justify-content: center; */
+  padding: 16px;
+}
+
+/* event styles */
+/* Card styles */
+.event-card.MuiPaper-root.MuiCard-root{
+  position: relative;
+  height: 100%; /* Set the desired height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  overflow: hidden; /* Prevent content from overflowing the card */
+}
+
+.event-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Typography for event titles */
+.event-title {
+  font-weight: bold;
+  color:  #333;
+}
+
+/* Typography for event details */
+.event-info {
+  color: #555;
+}
+
+/* Actions section in the card */
+.card-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* Button styles */
+.button {
+  background: linear-gradient(135deg, #6E45E2 0%, #88D3CE 100%);
+  color: #fff;
+  padding: 8px 24px;
+  text-transform: none;
+  margin-right: 15px;
+  border-radius: 12px;
+  transition: background 0.3s ease-in-out;
+}
+
+.button:hover {
+  background: linear-gradient(135deg, #88D3CE 0%, #6E45E2 100%);
+}
+/* No events message */
+.no-events {
+  width: 100%;
+  text-align: left;
+  color: #888;
+  font-size: 18px;
+}
+
+/* Taskbar styling */
+.nav-bar.MuiAppBar-root {
+  background: linear-gradient(90deg, #3f51b5, #1e88e5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
+}
+
+.nav-button.MuiButton-root {
+  text-transform: none;
+  font-size: 16px; 
+  margin-right: 15px;
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.category-button.MuiButton-root {
+  text-transform: none;
+  background: linear-gradient(90deg, #3f51b5, #1e88e5);
+  color: #fff;
+  font-size: 13px; 
+  margin-right: 15px;
+  border-radius: 12px;
+}
+
+.category-button:hover {
+  background: linear-gradient(135deg, #6E45E2 0%, #88D3CE 100%);
+}
+
+.login-button.MuiButton-root {
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  background-color: #ffffff;
+  color: #1e88e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.login-button:hover {
+  transform: scale(1.1);
+}
+
+/* Hover effect for the menu items */
+.MuiMenuItem-root:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.event-image-container {
+  margin-top: 20px;
+  text-align: center;
+  position: relative;
+  
+}
+
+.event-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.arrow-button.MuiButton-root {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.left-arrow {
+  left: 0;
+}
+
+.right-arrow {
+  right: 0;
+}
+.background-image {
+  background-image: url('C:\EventShare\eventshare-front\public\background.jpg');
+  background-size: cover; /* Adjust the size as needed */
+  background-position: center; /* Center the image */
+  height: 100vh; /* Set height to cover the viewport */
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #0073b1;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.pagination-info {
+  font-size: 1.2em;
+  color: #333;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  margin: 0 5px;
+  background-color: #0073b1;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.pagination-button.active {
+  background-color: #0056b3;
+  font-weight: bold;
+}
+
+.pagination-info {
+  font-size: 1.2em;
+  color: #333;
+}

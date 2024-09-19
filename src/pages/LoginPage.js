@@ -4,6 +4,7 @@ import { Tabs, Tab, Box, TextField, Button, Typography, Container } from '@mui/m
 import axios from 'axios';
 
 function LoginPage({ setUserRole }) {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [selectedTab, setSelectedTab] = useState(0);  // 0 = Normal, 1 = Admin
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +34,7 @@ function LoginPage({ setUserRole }) {
   const handleLogin = async () => {
     try {
       const role = selectedTab === 0 ? 'normal' : 'admin';
-      const response = await axios.post('http://localhost:5000/auth/login', { email, password, role });
+      const response = await axios.post(`${apiBaseUrl}/auth/login`, { email, password, role });
       localStorage.setItem('userRole', role);  // 保存用户角色
       localStorage.setItem('userEmail', email);  // 保存用户角色
       setUserRole(role);

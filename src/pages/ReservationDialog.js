@@ -3,6 +3,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle,FormControl,InputLabe
 import axios from 'axios';
 
 const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshReservedEvents }) => {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [selectedDate, setSelectedDate] = useState('');
   const [availableDates, setAvailableDates] = useState([]);
   const [reservation, setReservation] = useState({
@@ -18,7 +19,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
 
   useEffect(() => {
     if (event && event.weekday) {
-      fetch(`http://localhost:5000/api/${event.eventId}/weekdays?weekday=${event.weekday}&capacity=${event.capacity}`)
+      fetch(`${apiBaseUrl}/api/${event.eventId}/weekdays?weekday=${event.weekday}&capacity=${event.capacity}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error('Failed to fetch dates');
@@ -72,7 +73,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
   const handleSubmit = async () => {
     try {
       console.log('reservation:',reservation);
-      await axios.post(`http://localhost:5000/api/events/reservations/${event.eventId}`, reservation);
+      await axios.post(`${apiBaseUrl}/api/events/reservations/${event.eventId}`, reservation);
       alert('Reservation successful!');
       refreshReservedEvents(); // Refresh reserved events after a successful reservation
       onClose();

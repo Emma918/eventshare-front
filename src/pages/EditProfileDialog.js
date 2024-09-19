@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Grid, Box } from '@mui/material';
-
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
   const [profile, setProfile] = useState({
     name: '',
@@ -18,7 +18,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
     // 从服务器获取用户的详细信息
     const fetchUserDetails = async () => {
       if (role === 'normal') {
-        const response = await axios.get(`http://localhost:5000/api/normal-user-details/${userEmail}`);
+        const response = await axios.get(`${apiBaseUrl}/api/normal-user-details/${userEmail}`);
         setProfile({
           name: response.data.name,
           gender: response.data.gender,
@@ -27,7 +27,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
           firstLanguage: response.data.firstLanguage
         });
       } else if (role === 'admin') {
-        const response = await axios.get(`http://localhost:5000/api/admin-user-details/${userEmail}`);
+        const response = await axios.get(`${apiBaseUrl}/api/admin-user-details/${userEmail}`);
         setProfile({
           adminName: response.data.adminName,
           address: response.data.address,
@@ -45,7 +45,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
   const handleSubmit = async () => {
     try {
       if (role === 'normal') {
-        await axios.post(`http://localhost:5000/api/normal-user-details/update/${userEmail}`, {
+        await axios.post(`${apiBaseUrl}/api/normal-user-details/update/${userEmail}`, {
           name: profile.name,
           gender: profile.gender,
           phone: profile.phone,
@@ -53,7 +53,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
           firstLanguage: profile.firstLanguage
         });
       } else if (role === 'admin') {
-        await axios.post(`http://localhost:5000/api/admin-user-details/update/${userEmail}`, {
+        await axios.post(`${apiBaseUrl}/api/admin-user-details/update/${userEmail}`, {
           adminName: profile.adminName,
           address: profile.address,
           adminPhone: profile.adminPhone

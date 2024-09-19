@@ -9,6 +9,7 @@ import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from
 import { Link } from 'react-router-dom';
 import ShareIcon from '@mui/icons-material/Share';
 function HomePage() {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [events, setEvents] = useState([]);  // 存储英语课程
   const [filteredData, setFilteredData] = useState([]);  // 存储过滤后的数据
   const [userName, setUserName] = useState('');  // 初始化 userName 为空字符串
@@ -26,10 +27,10 @@ function HomePage() {
     const fetchUserDetails = async () => {
    try {
     if (userRole === 'admin') {
-     const response = await axios.get(`http://localhost:5000/api/admin-user-details/${userEmail}`);
+     const response = await axios.get(`${apiBaseUrl}/api/admin-user-details/${userEmail}`);
      setUserName(response.data.adminName);
     } else {
-      const response = await axios.get(`http://localhost:5000/api/normal-user-details/${userEmail}`);
+      const response = await axios.get(`${apiBaseUrl}/api/normal-user-details/${userEmail}`);
       setUserName(response.data.name);  // 获取用户的 name 并赋值给 userName
     }   
    } catch (error) {
@@ -45,7 +46,7 @@ function HomePage() {
     // 获取课程和活动数据
     const fetchData = async () => {
       try {
-        const eventsResponse = await axios.get('http://localhost:5000/api/events');
+        const eventsResponse = await axios.get(`${apiBaseUrl}/api/events`);
         setEvents(eventsResponse.data);
         setFilteredData([...eventsResponse.data]);
       } catch (error) {
@@ -86,7 +87,7 @@ function HomePage() {
           .share({
             title: item.title,
             text: `Check out this event: ${item.title}`,
-            url: `http://localhost:3000/events/${item.eventId}`,
+            url: `${apiBaseUrl}/events/${item.eventId}`,
           })
           .then(() => console.log('Event shared successfully'))
           .catch((error) => console.error('Error sharing the event:', error));
@@ -160,7 +161,7 @@ function HomePage() {
             <Box className="event-image-container">
             {/* Display the current image */}
             <img
-               src={`http://localhost:5000/${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
+               src={`${apiBaseUrl}/${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
                alt={`Event Image ${getCurrentImageIndex(item.eventId) + 1}`}
                className="event-image"
              />         

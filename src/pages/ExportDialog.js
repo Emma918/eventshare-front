@@ -2,11 +2,11 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, Select, MenuItem, DialogActions, Button } from '@mui/material';
 import axios from 'axios';
 import { saveAs } from 'file-saver'; // To download CSV files
-
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 const ExportDialog = ({ open, onClose, eventId, availableDates, selectedDate, setSelectedDate }) => {
   const handleExport = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/events/${eventId}/reservations?date=${selectedDate}`);
+      const response = await axios.get(`${apiBaseUrl}/api/events/${eventId}/reservations?date=${selectedDate}`);
       const reservations = response.data;
 
       if (reservations.length === 0) {

@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function EventSearch() {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [location, setLocation] = useState('');
   const [events, setEvents] = useState([]);
 
   const searchEvents = async () => {
-    const response = await axios.get(`http://localhost:5000/events?location=${location}`);
+    const response = await axios.get(`${apiBaseUrl}/events?location=${location}`);
     setEvents(response.data);
   };
 

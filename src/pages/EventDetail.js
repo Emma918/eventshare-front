@@ -11,7 +11,7 @@ import EditProfileDialog from './EditProfileDialog';
 import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from './menuUtils';
 import ShareIcon from '@mui/icons-material/Share';
 import DOMPurify from 'dompurify';
-
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 const EventDetail = () => {
   const { eventId } = useParams(); // Get the event ID from the URL
   const [event, setEvent] = useState(null);
@@ -28,10 +28,10 @@ const EventDetail = () => {
     const fetchUserDetails = async () => {
    try {
     if (userRole === 'admin') {
-     const response = await axios.get(`http://localhost:5000/api/admin-user-details/${userEmail}`);
+     const response = await axios.get(`${apiBaseUrl}/api/admin-user-details/${userEmail}`);
      setUserName(response.data.adminName);
     } else {
-      const response = await axios.get(`http://localhost:5000/api/normal-user-details/${userEmail}`);
+      const response = await axios.get(`${apiBaseUrl}/api/normal-user-details/${userEmail}`);
       setUserName(response.data.name);  // 获取用户的 name 并赋值给 userName
     }   
    } catch (error) {
@@ -47,7 +47,7 @@ const EventDetail = () => {
     // Fetch event details using the event ID
     const fetchEventDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/events/${eventId}`);
+        const response = await axios.get(`${apiBaseUrl}/api/events/${eventId}`);
         setEvent(response.data);
       } catch (error) {
         console.error('Error fetching event details:', error);
@@ -80,7 +80,7 @@ const EventDetail = () => {
         .share({
           title: event.title,
           text: `Check out this event: ${event.title}`,
-          url: `http://localhost:3000/events/${event.eventId}`,
+          url: `${apiBaseUrl}/events/${event.eventId}`,
         })
         .then(() => console.log('Event shared successfully'))
         .catch((error) => console.error('Error sharing the event:', error));
@@ -121,7 +121,7 @@ const EventDetail = () => {
             <Box className="event-image-container">
             {/* Display the current image */}
             <img
-              src={`http://localhost:5000/${event.images[currentImageIndex].imagePath}`}
+              src={`${apiBaseUrl}/${event.images[currentImageIndex].imagePath}`}
               alt={`Event Image ${currentImageIndex + 1}`}
               className="event-image"
             />

@@ -3,6 +3,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, G
 import axios from 'axios';
 
 const ChangePasswordDialog = ({ open, onClose, userEmail }) => {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState(''); // 新增确认密码状态
@@ -15,7 +16,7 @@ const ChangePasswordDialog = ({ open, onClose, userEmail }) => {
     }
 
     try {
-      await axios.post('http://localhost:5000/auth/change-password', {
+      await axios.post(`${apiBaseUrl}/auth/change-password`, {
         email: userEmail,
         oldPassword,
         newPassword

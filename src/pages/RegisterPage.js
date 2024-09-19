@@ -4,6 +4,7 @@ import { Tabs, Tab, Box, TextField, Button, Typography, Container } from '@mui/m
 import axios from 'axios';
 
 function RegisterPage() {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [selectedTab, setSelectedTab] = useState(0);  // 0 = Normal, 1 = Admin
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,14 +33,14 @@ function RegisterPage() {
   const handleRegister = async () => {
     try {
       const role = selectedTab === 0 ? 'normal' : 'admin';
-      await axios.post('http://localhost:5000/auth/register', { email, password, role });
+      await axios.post(`${apiBaseUrl}/auth/register`, { email, password, role });
       alert('Registration successful! Please login.');
       window.location.href = '/login';
     } catch (error) {
       setError('Registration failed. Please try again.');
     }
   };
-
+{/*
   const handleGoogleSuccess = (response) => {
     console.log('Google success', response);
   };
@@ -53,9 +54,9 @@ function RegisterPage() {
   const handleAppleLogin = () => {
     window.AppleID.auth.signIn();
   };
-
+  */}
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2,mt : 4  }}>
       <Box
         sx={{
           marginTop: 8,
@@ -108,7 +109,7 @@ function RegisterPage() {
             Sign Up
           </Button>
         </Box>
-
+{/*
         <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
@@ -133,7 +134,7 @@ function RegisterPage() {
         >
           Sign in with Apple
         </Button>
-
+*/}
         <Typography variant="body2" sx={{ mt: 2 }}>
           Already have an account? <a href="/login">Sign in here</a>
         </Typography>

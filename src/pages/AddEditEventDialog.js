@@ -4,6 +4,7 @@ import { Box, Button, Dialog,FormControl,InputLabel,Select,MenuItem,IconButton, 
 import { Close,Delete  } from '@mui/icons-material';
 import ReactQuill from 'react-quill'; 
 import 'react-quill/dist/quill.snow.css'; 
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventSubmit,isEdit  }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
@@ -16,7 +17,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
     }
     //get category
     const getCategory = async () => {
-      const response = await axios.get('http://localhost:5000/api/columns/Event category');
+      const response = await axios.get(`${apiBaseUrl}/api/columns/Event category`);
       if(response.length !==0){
         setCategorys(response.data); 
     }
@@ -24,7 +25,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
     getCategory();
     //get level
     const getLevel = async () => {
-      const response = await axios.get('http://localhost:5000/api/columns/English Level');
+      const response = await axios.get(`${apiBaseUrl}/api/columns/English Level`);
       if(response.length !==0){
         setEnglishLevels(response.data); 
     }
@@ -43,7 +44,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
       // Delete image from the server
       const imagePath = existingImages[index].imagePath.replace(/\\/g, '/'); // Replace backslashes with forward slashes
       const encodedImagePath = encodeURIComponent(imagePath);
-      await axios.delete(`http://localhost:5000/api/eventImage/${newEvent.eventId}?imagePath=${encodedImagePath}`);
+      await axios.delete(`${apiBaseUrl}/api/eventImage/${newEvent.eventId}?imagePath=${encodedImagePath}`);
       
       // Update state to remove the image from the UI
       const updatedExistingImages = existingImages.filter((_, i) => i !== index);
@@ -130,7 +131,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
         <input type="file"name="images"accept="image/*"multiple onChange={handleImageChange}/>
          { existingImages&& existingImages.map((image, index) => (
           <Box key={index} sx={{ mt: 2, position: 'relative' }}>
-            <img src={`http://localhost:5000/${image.imagePath}`} alt={`Existing  ${index}`} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+            <img src={`${apiBaseUrl}/${image.imagePath}`} alt={`Existing  ${index}`} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
             <IconButton sx={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'white', borderRadius: '50%' }}onClick={() => handleDeleteExistingImage(index)}size="small"><Delete /></IconButton>
           </Box>
         ))}

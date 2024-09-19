@@ -15,7 +15,7 @@ import AddEditEventDialog from './AddEditEventDialog';  // 新增活动对话框
 import ExportDialog from './ExportDialog'; 
 import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from './menuUtils';
 function AdminDashboard() {
-
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [date, setDate] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -57,7 +57,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchEvents = async () => {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/events', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${apiBaseUrl}/api/events`, { headers: { Authorization: `Bearer ${token}` } });
       setEvents(response.data);
       setFilteredEvents(response.data);  // 默认显示所有活动
     };
@@ -67,7 +67,7 @@ function AdminDashboard() {
 useEffect(() => {
   const fetchUserDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/admin-user-details/${userEmail}`);
+      const response = await axios.get(`${apiBaseUrl}/api/admin-user-details/${userEmail}`);
       setAdminUserDetail(response.data);  // 将用户详细信息存储在状态中
       setUserName(response.data.adminName);  // 获取用户的 name 并赋值给 userName
     } catch (error) {
@@ -103,7 +103,7 @@ const filterEvents = () => {
 const refreshEvents = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get('http://localhost:5000/api/events', { headers: { Authorization: `Bearer ${token}` } });
+    const response = await axios.get(`${apiBaseUrl}/api/events`, { headers: { Authorization: `Bearer ${token}` } });
     setEvents(response.data);
     setFilteredEvents(response.data);  // 默认显示所有活动
   } catch (error) {
@@ -134,7 +134,7 @@ const handleAddEventOpen = () => {
  const handleAddEventSubmit = async (formData) => {
       try {
         console.log('newEvent:', formData); // Check what is being sent to the backend
-        const response = await axios.post('http://localhost:5000/api/events', formData, {
+        const response = await axios.post(`${apiBaseUrl}/api/events`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data', // Set the correct headers for file upload
           }
@@ -176,7 +176,7 @@ const handleAddEventOpen = () => {
   // 提交更新的活动信息
   const handleEditEventSubmit = async (formData) => {
     try {
-      await axios.put(`http://localhost:5000/api/events/${selectedEvent.eventId}`, formData, {
+      await axios.put(`${apiBaseUrl}/api/events/${selectedEvent.eventId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // Set the correct headers for file upload
         }
@@ -207,7 +207,7 @@ const handleAddEventOpen = () => {
   const handleDeleteEvent = async () => {
     try {
       console.log(selectedEvent.eventId);
-      await axios.delete(`http://localhost:5000/api/events/${selectedEvent.eventId}`);
+      await axios.delete(`${apiBaseUrl}/api/events/${selectedEvent.eventId}`);
       setEvents(events.filter((event) => event.eventId !== selectedEvent.eventId));
       setOpenConfirmDelete(false);
       alert("The event has been deleted.");
@@ -222,7 +222,7 @@ const handleAddEventOpen = () => {
         .share({
           title: event.title,
           text: `Check out this event: ${event.title}`,
-          url: `http://localhost:3000/events/${event.eventId}`,
+          url: `${apiBaseUrl}/events/${event.eventId}`,
         })
         .then(() => console.log('Event shared successfully'))
         .catch((error) => console.error('Error sharing the event:', error));
@@ -257,14 +257,14 @@ const handleAddEventOpen = () => {
       setSelectedEventId(eventId);
       if (repeat) {
         try {
-          const response = await axios.get(`http://localhost:5000/api/${eventId}/weekdays?weekday=${weekday}`);
+          const response = await axios.get(`${apiBaseUrl}/api/${eventId}/weekdays?weekday=${weekday}`);
           setAvailableDates(response.data);
           setOpenExportDialog(true); // Open the export dialog
         } catch (error) {
           console.error('Error fetching available dates:', error);
         }
       } else {
-    const response = await axios.get(`http://localhost:5000/api/events/${eventId}/reservations`);
+    const response = await axios.get(`${apiBaseUrl}/api/events/${eventId}/reservations`);
     const reservations = response.data;
 
     if (reservations.length === 0) {
@@ -376,7 +376,7 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
             <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               {event.images && event.images.length > 0 && (
                 <img
-                   src={`http://localhost:5000/${event.images[0].imagePath}`}
+                   src={`${apiBaseUrl}/${event.images[0].imagePath}`}
                    alt="Event"
                     style={{ width: 'auto', height: 'auto', maxHeight: '150px', objectFit: 'cover' }}
                   />)}

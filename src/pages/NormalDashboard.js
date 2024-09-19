@@ -14,6 +14,7 @@ import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 function NormalDashboard() {
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [events, setEvents] = useState([]);
   const [currentEvents, setCurrentEvents] = useState([]);
   const [date, setDate] = useState(null);
@@ -37,7 +38,7 @@ function NormalDashboard() {
   const eventsPerPage = 5; 
   useEffect(() => {
     const fetchEvents = async () => {
-      const response = await axios.get('http://localhost:5000/api/events');
+      const response = await axios.get(`${apiBaseUrl}/api/events`);
       if(response.length !==0){
         const eventsData = response.data;
         const updatedEvents = await checkIfEventsFull(eventsData);
@@ -48,7 +49,7 @@ function NormalDashboard() {
     fetchEvents();
      //get category
      const getCategory = async () => {
-      const response = await axios.get('http://localhost:5000/api/columns/Event category');
+      const response = await axios.get(`${apiBaseUrl}/api/columns/Event category`);
       if(response.length !==0){
         setCategorys(response.data); 
     }
@@ -62,7 +63,7 @@ function NormalDashboard() {
        console.log('event.repeat', event.repeat);
         if(!event.repeat){
         // 获取该event的预约人数
-        const { data: reservationCount } = await axios.get(`http://localhost:5000/api/${event.eventId}/reservnum?date=${event.date}`);
+        const { data: reservationCount } = await axios.get(`${apiBaseUrl}/api/${event.eventId}/reservnum?date=${event.date}`);
         // 判断是否预约满了
         isFull = reservationCount >= event.capacity;
       } 
@@ -82,7 +83,7 @@ function NormalDashboard() {
    useEffect(() => {
      const fetchUserDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/normal-user-details/${userEmail}`);
+      const response = await axios.get(`${apiBaseUrl}/api/normal-user-details/${userEmail}`);
       if(response.length !==0){
       setNormalUserDetail(response.data);  // 将用户详细信息存储在状态中
       setUserName(response.data.name);  // 获取用户的 name 并赋值给 userName
@@ -99,7 +100,7 @@ function NormalDashboard() {
 useEffect(() => {
   const fetchReservedEvents = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/user/reserved-events/${userEmail}`);
+      const response = await axios.get(`${apiBaseUrl}/api/user/reserved-events/${userEmail}`);
       if(response.length !==0){
       setReservedEvents(response.data);  // 保存预约课程信息
     }
@@ -115,7 +116,7 @@ useEffect(() => {
  // Fetch reserved events
 const refreshReservedEvents = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/user/reserved-events/${userEmail}`);
+    const response = await axios.get(`${apiBaseUrl}/api/user/reserved-events/${userEmail}`);
     if(response.length !==0){
     setReservedEvents(response.data);
   }
@@ -162,7 +163,7 @@ const handleReserveClick = (event) => {
  // 取消预约
  const handleCancelReservation = async (eventId, date) => {
   try {
-    await axios.delete(`http://localhost:5000/api/events/reserve/${eventId}`, {
+    await axios.delete(`${apiBaseUrl}/api/events/reserve/${eventId}`, {
       data: {
         email: userEmail,
       }
@@ -284,7 +285,7 @@ useEffect(() => {
                      <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         {event.images && event.images.length > 0 && (
                         <img
-                          src={`http://localhost:5000/${event.images[0].imagePath}`}
+                          src={`${apiBaseUrl}/${event.images[0].imagePath}`}
                           alt="Event"
                           style={{ width: '100%', height: 'auto', maxHeight: '150px', objectFit: 'cover' }}
                         />)}

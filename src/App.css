@@ -123,12 +123,34 @@ body {
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
 }
 
-/* Typography for event titles */
-.event-title {
-  font-weight: bold;
-  color:  #333;
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
+.event-title {
+  font-size: 2rem;
+  margin-right: 16px;
+}
+
+/* For mobile screens (small devices) */
+@media (max-width: 600px) {
+  .event-title {
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  .event-header {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .event-share-btn {
+    margin-left: auto;
+  }
+}
 /* Typography for event details */
 .event-info {
   color: #555;
@@ -321,4 +343,15 @@ body {
 .pagination-info {
   font-size: 1.2em;
   color: #333;
+}
+.contact-container.MuiContainer-root {
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 32px;
+  max-width: 600px;
+  width: 60%;
+  text-align: left;
+  margin-left: 0;
+  margin-right: auto;
 }

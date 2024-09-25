@@ -5,10 +5,13 @@ import axios from 'axios';
 
 function LoginPage({ setUserRole }) {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const googleclientID = process.env.REACT_APP_API_GOOGLE_CLIENT_ID;
   const [selectedTab, setSelectedTab] = useState(0);  // 0 = Normal, 1 = Admin
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  console.log('apiBaseUrl',apiBaseUrl);
+  console.log('googleclientID',googleclientID);
  {/* 
   useEffect(() => {
     // Load Facebook SDK
@@ -47,12 +50,28 @@ function LoginPage({ setUserRole }) {
       setError('Login failed. Please check your credentials.');
     }
   };
-{/*
-  const handleGoogleSuccess = (response) => {
-    console.log('Google success', response);
-    // Handle Google login on server-side
-  };
 
+  const handleGoogleSuccess = async (response) => {
+    try {
+      const result = await axios.post(`${apiBaseUrl}/auth/google-login`, {
+        token: response.credential,
+      });
+
+      const { role, email } = result.data;
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userEmail', email);
+      setUserRole(role);
+
+      if (role === 'admin') {
+        window.location.href = '/admin-dashboard';
+      } else {
+        window.location.href = '/normal-dashboard';
+      }
+    } catch (error) {
+      setError('Google login failed.');
+    }
+  };
+{/*
   const handleFacebookLogin = () => {
     window.FB.login(function(response) {
       if (response.authResponse) {
@@ -118,6 +137,9 @@ function LoginPage({ setUserRole }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <Typography variant="body2" sx={{ mt: 1 }}>
+          Forgot your password? <a href="/forgot-password">Reset here</a>
+          </Typography>
           {error && <Typography color="error">{error}</Typography>}
           <Button
             fullWidth
@@ -129,12 +151,13 @@ function LoginPage({ setUserRole }) {
           </Button>
         </Box>
 {/*
-        <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+        <GoogleOAuthProvider clientId={googleclientID}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => console.log('Google Login Failed')}
           />
         </GoogleOAuthProvider>
+        
         <Button
           fullWidth
           variant="outlined"
@@ -153,7 +176,7 @@ function LoginPage({ setUserRole }) {
           Sign in with Apple
         </Button>
 */}
-        <Typography variant="body2" sx={{ mt: 2 }}>
+        <Typography variant="body2" sx={{ mt: 1}}>
           New user? <a href="/register">Register here</a>
         </Typography>
       </Box>

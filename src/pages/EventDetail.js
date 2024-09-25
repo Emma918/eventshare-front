@@ -6,9 +6,6 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Button,IconButton } from '@mui/material';
 import TopNavBar from '../components/TopNavBar';
-import ChangePasswordDialog from './ChangePasswordDialog';
-import EditProfileDialog from './EditProfileDialog';
-import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from './menuUtils';
 import ShareIcon from '@mui/icons-material/Share';
 import DOMPurify from 'dompurify';
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
@@ -20,8 +17,6 @@ const EventDetail = () => {
   const userRole= localStorage.getItem('userRole');  //用户角色
   const [isLoggedIn, setIsLoggedIn] = useState(!!userEmail);  // 检查是否已登录
   const [anchorEl, setAnchorEl] = useState(null);  // 控制菜单
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track the currently displayed image
   const open = Boolean(anchorEl);
   useEffect(() => {
@@ -91,31 +86,16 @@ const EventDetail = () => {
   return (
     <div className="container">
        {/* 顶端任务栏 */}
-    <TopNavBar
+       <TopNavBar
         isLoggedIn={isLoggedIn}
         userName={userName}
+        userRole={userRole}
+        userEmail={userEmail}
         anchorEl={anchorEl}
         open={open}
-        handleEnglishOpen={() => {
-          try {
-          if (userRole === 'admin') {
-            window.location.href = '/admin-dashboard';
-          } else {
-            window.location.href = '/normal-dashboard';
-          } } catch (error) {
-            console.error(error);
-          }}}
-        handleMenuOpen={(e) => setAnchorEl(e.currentTarget)}
-        handleMenuClose={() => setAnchorEl(null)}
-        handleLogout={() => {
-          setIsLoggedIn(false);
-          localStorage.removeItem('userEmail');
-          localStorage.removeItem('userRole');
-          window.location.href = '/login';
-        }}
-        setIsChangePasswordOpen={setIsChangePasswordOpen}
-        setIsEditProfileOpen={setIsEditProfileOpen}
-       />
+        setIsLoggedIn={setIsLoggedIn}
+        setAnchorEl={setAnchorEl}
+      />
       <Box sx={{ padding: 3 }}>
       {event.images && event.images.length > 0 && (
             <Box className="event-image-container">
@@ -145,11 +125,13 @@ const EventDetail = () => {
             </Button>
           </Box>
       )}
-      <Box  sx={{ display: 'flex', gap: 10, mt: 3,height:'50px' }}>
-      <Typography variant="h4" gutterBottom>{event.title}</Typography>
-      <IconButton onClick={() => handleShareEvent(event)}>
-          <ShareIcon />
-      </IconButton>
+      <Box className="event-header" sx={{ mt: 2 }}>
+       <Typography className="event-title" variant="h5">
+       {event.title}
+       </Typography>
+       <IconButton className="event-share-btn" onClick={() => handleShareEvent(event)}>
+        <ShareIcon />
+       </IconButton>
       </Box>
       <Typography variant="body1"><strong>Organizer:</strong>{event.organizer}</Typography>
       <Typography variant="body1"><strong>Date:</strong> {event.repeat ?`Every ${event.weekday}` 
@@ -177,18 +159,6 @@ const EventDetail = () => {
         Go Back
       </Button>
     </Box>
-    <ChangePasswordDialog
-        open={isChangePasswordOpen}
-        onClose={handleChangePasswordClose(setIsChangePasswordOpen, handleMenuClose(setAnchorEl))}
-        userEmail={userEmail}
-      />
-
-      <EditProfileDialog
-        open={isEditProfileOpen}
-        onClose={handleEditProfileClose(setIsEditProfileOpen, handleMenuClose(setAnchorEl))}
-        userEmail={userEmail}
-        role={userRole}
-      />
     </div>
   );
 };

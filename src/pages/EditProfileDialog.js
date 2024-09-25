@@ -82,6 +82,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
                     value={profile.name}
                     onChange={handleChange}
                     fullWidth
+                    required
                     variant="outlined"
                   />
                 </Grid>

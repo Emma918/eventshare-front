@@ -92,7 +92,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
           <Typography variant="h5">{isEdit ? 'Edit Event' : 'Add New Event'}</Typography>
           <IconButton onClick={onClose}><Close /></IconButton>
         </Box>
-        <FormControl fullWidth>
+        <FormControl fullWidth required>
           <InputLabel>Category</InputLabel>
           <Select label="Category"value={newEvent.category}onChange={(e) => setNewEvent({ ...newEvent, category: e.target.value })}>
              {eventCategorys.map((categorys, index) => (
@@ -102,20 +102,20 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
              ))} 
             </Select>
         </FormControl>
-        <TextField label="Title" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} fullWidth />
+        <TextField label="Title" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} fullWidth required />
         <Box sx={{ display: 'flex', justifyContent: 'space-between',  gap: 2,mt: 1 }}>
-           <TextField label="Start Date" type="date" value={newEvent.startdate || ''} onChange={(e) => setNewEvent({ ...newEvent, startdate: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
-           <TextField label="End Date" type="date" value={newEvent.enddate || ''} onChange={(e) => setNewEvent({ ...newEvent, enddate: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
+           <TextField label="Start Date" type="date" value={newEvent.startdate || ''} onChange={(e) => setNewEvent({ ...newEvent, startdate: e.target.value })} fullWidth required InputLabelProps={{ shrink: true }} />
+           <TextField label="End Date" type="date" value={newEvent.enddate || ''} onChange={(e) => setNewEvent({ ...newEvent, enddate: e.target.value })} fullWidth  required InputLabelProps={{ shrink: true }} />
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between',  gap: 2,mt: 1 }}>
-        <TextField label="Start Time" type="time" value={newEvent.startTime || ''} onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
-          <TextField label="End Time" type="time" value={newEvent.endTime || ''} onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
+        <TextField label="Start Time" type="time" value={newEvent.startTime || ''} onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })} fullWidth required InputLabelProps={{ shrink: true }} />
+          <TextField label="End Time" type="time" value={newEvent.endTime || ''} onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })} fullWidth required InputLabelProps={{ shrink: true }} />
         </Box>
-        <TextField label="Organizer" value={newEvent.organizer} onChange={(e) => setNewEvent({ ...newEvent, organizer: e.target.value })} fullWidth/>
-        <TextField label="Location" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} fullWidth />
+        <TextField label="Organizer" value={newEvent.organizer} onChange={(e) => setNewEvent({ ...newEvent, organizer: e.target.value })} fullWidth required/>
+        <TextField label="Location" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} fullWidth required />
         <TextField label="Capacity" type="number" value={newEvent.capacity} onChange={(e) => setNewEvent({ ...newEvent, capacity: e.target.value })} fullWidth inputProps={{ min: 0 }} />
         {newEvent.category === 1 && (
-       <FormControl fullWidth>
+       <FormControl fullWidth required>
           <InputLabel>Level</InputLabel>
           <Select label="Level"value={newEvent.level}onChange={(e) => setNewEvent({ ...newEvent, level: e.target.value })}>
              {englishLevels.map((level, index) => (
@@ -127,7 +127,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
         </FormControl>)}
         <Typography variant="h6">Description</Typography>
         <ReactQuill theme="snow" value={newEvent.description} onChange={(value) => setNewEvent({ ...newEvent, description: value })} />
-        <Typography variant="h6">Upload Images</Typography>
+        <Typography variant="h6">Upload Images*(Up to 5 images)</Typography>
         <input type="file"name="images"accept="image/*"multiple onChange={handleImageChange}/>
          { existingImages&& existingImages.map((image, index) => (
           <Box key={index} sx={{ mt: 2, position: 'relative' }}>

@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminDashboard from './pages/AdminDashboard';
-import EventSearch from './pages/EventSearch';
 import NormalDashboard from './pages/NormalDashboard';
 import HomePage from './pages/HomePage';  
 import EventDetail from './pages/EventDetail';
+import RequestPasswordReset from './pages/RequestPasswordReset';
+import ResetPassword from './pages/ResetPassword'; 
+import ContactUs from './pages/ContactUs';
 import './App.css';
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole'));  
@@ -29,6 +31,9 @@ function App() {
         <Route path="/homepage" element={<HomePage />} />
         <Route path="/normal-dashboard" element={<NormalDashboard />} />
         <Route path="/events/:eventId" element={<EventDetail />} />
+        <Route path="/forgot-password" element={<RequestPasswordReset />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/contact-us" element={<ContactUs />} />
 
         {/* Conditionally render based on user role */}
         {userRole === 'admin' && (
@@ -37,9 +42,6 @@ function App() {
         {userRole === 'normal' && (
           <Route path="/normal-dashboard" element={<NormalDashboard />} />
         )}
-        
-        {/* Event Search accessible to both roles */}
-        <Route path="/event-search" element={<EventSearch />} />
       </Routes>
     </Router>
   );

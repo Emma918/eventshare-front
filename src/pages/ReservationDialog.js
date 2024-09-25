@@ -97,7 +97,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
                 InputProps={{
                   style: { height: '56px' }}}/>
               ) : (
-                <FormControl fullWidth variant="outlined"> 
+                <FormControl fullWidth required variant="outlined"> 
                 <InputLabel id="date">Date</InputLabel>
                 <Select
                   label="Date"
@@ -105,6 +105,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
                   value={selectedDate}
                   onChange={handleDateChange}  // Handle date change
                   fullWidth
+                  required
                   variant="outlined"
                 >
                   {availableDates.map((date, index) => (
@@ -123,6 +124,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
               value={reservation.name}
               onChange={handleChange}
               fullWidth
+              required
               variant="outlined"
               InputProps={{
                 style: { height: '56px' }
@@ -162,6 +164,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
               value={reservation.email}
               onChange={handleChange}
               fullWidth
+              required
               variant="outlined"
               InputProps={{
                 style: { height: '56px' }

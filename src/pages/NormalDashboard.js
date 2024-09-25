@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useRef } from 'react';
 import axios from 'axios';
 import '../App.css'; 
 import TopNavBar from '../components/TopNavBar';
@@ -8,14 +8,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Grid from '@mui/material/Grid';
 import ReservationDialog from './ReservationDialog';
-import ChangePasswordDialog from './ChangePasswordDialog';
-import EditProfileDialog from './EditProfileDialog';
-import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from './menuUtils';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 function NormalDashboard() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [events, setEvents] = useState([]);
+  const [orignevents, setOrignEvents] = useState([]);
   const [currentEvents, setCurrentEvents] = useState([]);
   const [date, setDate] = useState(null);
   const [location, setLocation] = useState('');
@@ -31,18 +29,41 @@ function NormalDashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null); // 当前选中的课程ID
   const [normalUserDetail, setNormalUserDetail] = useState(null); // 存储用户详细信息
   const [isReservationOpen, setIsReservationOpen] = useState(false);
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [eventCategorys, setCategorys] = useState([]);//  get event categorys
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentDate, setCurrentDate] = useState('');
+  const inputRef = useRef(null);  // 创建 ref 引用
   const eventsPerPage = 5; 
   useEffect(() => {
+    const checkIfEventsFull = async (events) => {
+      const updatedEvents = await Promise.all(
+        events.map(async (event) => {
+         let isFull =false;
+          if(!event.repeat && event.startdate===event.enddate){
+          // 获取该event的预约人数
+          const { data: reservationCount } = await axios.get(`${apiBaseUrl}/api/${event.eventId}/reservnum?date=${event.startdate}`);
+          // 判断是否预约满了
+          isFull = reservationCount >= event.capacity;
+          console.log(isFull);
+        } 
+          // 返回一个新的事件对象，添加了是否已满的标记
+          return {
+            ...event,
+            isFull, // 添加 `isFull` 字段来表示是否预约满了
+          };
+        })
+      );
+    
+      // 更新 events 列表，包含是否已满的信息
+      return updatedEvents; // Return the updated events
+    };
     const fetchEvents = async () => {
       const response = await axios.get(`${apiBaseUrl}/api/events`);
       if(response.length !==0){
         const eventsData = response.data;
         const updatedEvents = await checkIfEventsFull(eventsData);
-        setEvents(response.data);
+        setEvents(updatedEvents);
+        setOrignEvents(updatedEvents);
         setFilteredEvents(updatedEvents); 
     }
     };
@@ -55,29 +76,11 @@ function NormalDashboard() {
     }
     };
     getCategory();
-  }, []);
-  const checkIfEventsFull = async (events) => {
-    const updatedEvents = await Promise.all(
-      events.map(async (event) => {
-       let isFull =false;
-       console.log('event.repeat', event.repeat);
-        if(!event.repeat){
-        // 获取该event的预约人数
-        const { data: reservationCount } = await axios.get(`${apiBaseUrl}/api/${event.eventId}/reservnum?date=${event.date}`);
-        // 判断是否预约满了
-        isFull = reservationCount >= event.capacity;
-      } 
-        // 返回一个新的事件对象，添加了是否已满的标记
-        return {
-          ...event,
-          isFull, // 添加 `isFull` 字段来表示是否预约满了
-        };
-      })
-    );
+    const date = new Date();  // 获取当前日期
+    const formattedDate = date.toLocaleDateString();  // 格式化日期
+    setCurrentDate(formattedDate);  // 设置格式化的日期
+  }, [apiBaseUrl]);
   
-    // 更新 events 列表，包含是否已满的信息
-    return updatedEvents; // Return the updated events
-  };
   
 // 获取用户详细信息
    useEffect(() => {
@@ -96,7 +99,7 @@ function NormalDashboard() {
   if (userEmail) {
     fetchUserDetails();  // 如果用户邮箱存在，则获取详细信息
   }
-  }, [userEmail,normalUserDetail]);
+  }, [userEmail,normalUserDetail,apiBaseUrl]);
 useEffect(() => {
   const fetchReservedEvents = async () => {
     try {
@@ -112,7 +115,7 @@ useEffect(() => {
   if (userEmail) {
     fetchReservedEvents();
   }
-}, [userEmail]);
+}, [userEmail,apiBaseUrl]);
  // Fetch reserved events
 const refreshReservedEvents = async () => {
   try {
@@ -130,7 +133,13 @@ const filterEvents = () => {
     let filteredByDate  = events;
     let filteredByWeekday = events;
     if (date) {
-      filteredByDate  = filteredByDate.filter(event => new Date(event.startdate).toDateString() === new Date(date).toDateString());
+      filteredByDate = filteredByDate.filter(event => {
+        const eventStartDate = new Date(event.startdate);
+        const eventEndDate = new Date(event.enddate);
+        const inputDate = new Date(date);
+      
+        return inputDate >= eventStartDate && inputDate <= eventEndDate && !event.repeat;
+      });      
       const inputdate = new Date(date);  // 将日期字符串转换为 Date 对象
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const dayIndex = inputdate.getDay(); 
@@ -149,6 +158,15 @@ const filterEvents = () => {
   };
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);  // 切换选项卡
+  };
+  const filterEventsByCategory = (e) => {
+    setDate(null);
+    setLocation(null);
+    let uniqueEvents = orignevents;
+    const categoryValue = Number(e.currentTarget.value);
+    uniqueEvents = uniqueEvents.filter(event => event.category === categoryValue);
+    setEvents(uniqueEvents);
+    setFilteredEvents(uniqueEvents);
   };
 // 点击课程卡片进行预约
 const handleReserveClick = (event) => {
@@ -201,33 +219,37 @@ useEffect(() => {
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   setCurrentEvents(filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent));
 }, [filteredEvents, currentPage]);
-  return (
 
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      setDate(null);  // 清空日期
+    }
+  };
+  const handleFocus = () => {
+    if (inputRef.current) {
+      inputRef.current.select();  // 全选日期
+    }
+  };
+return (
     <div className="container">
     {/* 顶端任务栏 */}
     <TopNavBar
         isLoggedIn={isLoggedIn}
         userName={userName}
+        userRole={userRole}
+        userEmail={userEmail}
         anchorEl={anchorEl}
         open={open}
-        handleMenuOpen={(e) => setAnchorEl(e.currentTarget)}
-        handleMenuClose={() => setAnchorEl(null)}
-        handleLogout={() => {
-          setIsLoggedIn(false);
-          localStorage.removeItem('userEmail');
-          localStorage.removeItem('userRole');
-          window.location.href = '/login';
-        }}
-        setIsChangePasswordOpen={setIsChangePasswordOpen}
-        setIsEditProfileOpen={setIsEditProfileOpen}
+        setIsLoggedIn={setIsLoggedIn}
+        setAnchorEl={setAnchorEl}
       />
-      {/*
       <Box sx={{ display: 'flex', gap: 0.5, mt: 2 }}>
       {eventCategorys && eventCategorys.map((categorys, index) => (
-      <Button key={index} value={categorys.columnSeq} color="inherit" className="category-button">
+      <Button key={index} value={categorys.columnSeq} color="inherit" className="category-button" onClick={(e) => filterEventsByCategory(e)}>
       {categorys.columnDetail}
       </Button>
-      ))} </Box>*/}
+      ))} </Box>
     {/* 日期选择和地点输入 */}
     <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -235,7 +257,11 @@ useEffect(() => {
           label="Select Date"
           value={date}
           onChange={(newValue) => setDate(newValue)}
-          renderInput={(params) => <TextField {...params} />}
+          renderInput={(params) => <TextField {...params}  
+          inputRef={inputRef}  // 绑定 inputRef
+          onKeyDown={handleKeyDown}  // 监听删除键
+          onFocus={handleFocus}             
+        />}
         />
       </LocalizationProvider>
       <TextField
@@ -258,7 +284,7 @@ useEffect(() => {
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             {currentEvents.length === 0 ? (
-              <Typography>No Classes Available!</Typography>
+              <Typography>No Events Available!</Typography>
             ) : (
               currentEvents.map(event => (
                 <Grid item xs={12} key={event.eventId}>
@@ -282,13 +308,16 @@ useEffect(() => {
                           </Typography>
                       </Grid>
                       {/* Right side: Event image */}
-                     <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        {event.images && event.images.length > 0 && (
-                        <img
-                          src={`${apiBaseUrl}/${event.images[0].imagePath}`}
-                          alt="Event"
-                          style={{ width: '100%', height: 'auto', maxHeight: '150px', objectFit: 'cover' }}
-                        />)}
+                      <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                         {event.images && event.images.length > 0 && (
+                           <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                           <img
+                            src={`${apiBaseUrl}/${event.images[0].imagePath}`}
+                            alt="Event"
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                           />
+                           </div>
+                          )}
                       </Grid>
                     </Grid>
                     </CardContent>
@@ -338,14 +367,16 @@ useEffect(() => {
                     <CardContent>
                       <Typography variant="h6">{event.event.title}</Typography>
                       <Typography variant="body2">
+                        Organizer: {event.event.organizer}<br />
                         Date: {event.reservationDetails.date}  {event.event.startTime}--{event.event.endTime}<br />
                         Location: {event.event.location}<br />
                       </Typography>
                     </CardContent>
                     <CardActions>
-                      <Button variant="outlined" color="secondary" onClick={() => handleCancelReservation(event.event.eventId, event.reservationDetails.date)}>
+                    { new Date(event.reservationDetails.date)>=new Date(currentDate) && (<Button variant="outlined" color="secondary" onClick={() => handleCancelReservation(event.event.eventId, event.reservationDetails.date)}>
                         Cancel
-                      </Button>
+                      </Button>)
+                      }
                     </CardActions>
                   </Card>
                 </Grid>
@@ -360,19 +391,6 @@ useEffect(() => {
         event={selectedEvent}
         normalUserDetail={normalUserDetail}
         refreshReservedEvents={refreshReservedEvents} 
-      />
-
-      <ChangePasswordDialog
-        open={isChangePasswordOpen}
-        onClose={handleChangePasswordClose(setIsChangePasswordOpen, handleMenuClose(setAnchorEl))}
-        userEmail={userEmail}
-      />
-
-      <EditProfileDialog
-        open={isEditProfileOpen}
-        onClose={handleEditProfileClose(setIsEditProfileOpen, handleMenuClose(setAnchorEl))}
-        userEmail={userEmail}
-        role={userRole}
       />
   </div>
   

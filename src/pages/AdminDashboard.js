@@ -9,11 +9,8 @@ import { saveAs } from 'file-saver';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import ChangePasswordDialog from './ChangePasswordDialog';
-import EditProfileDialog from './EditProfileDialog';
 import AddEditEventDialog from './AddEditEventDialog';  // 新增活动对话框
 import ExportDialog from './ExportDialog'; 
-import {handleMenuClose, handleChangePasswordClose, handleEditProfileClose} from './menuUtils';
 function AdminDashboard() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [date, setDate] = useState(null);
@@ -25,14 +22,13 @@ function AdminDashboard() {
   const [openEdit, setOpenEdit] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const userEmail = localStorage.getItem('userEmail');  //用户的邮箱
   const userRole= localStorage.getItem('userRole');  //用户角色
   const [userName, setUserName] = useState('');  // 初始化 userName 为空字符串
+  const [userAddress, setUserAddress] = useState('');  // 初始化 userAddress 为空字符串
   const [isLoggedIn, setIsLoggedIn] = useState(!!userEmail);  // 检查是否已登录
   const [adminUserDetail, setAdminUserDetail] = useState(null); // 存储用户详细信息
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -70,6 +66,7 @@ useEffect(() => {
       const response = await axios.get(`${apiBaseUrl}/api/admin-user-details/${userEmail}`);
       setAdminUserDetail(response.data);  // 将用户详细信息存储在状态中
       setUserName(response.data.adminName);  // 获取用户的 name 并赋值给 userName
+      setUserAddress(response.data.address);
     } catch (error) {
       console.error('Error fetching user details:', error);
     }
@@ -86,7 +83,13 @@ const filterEvents = () => {
   let filteredByWeekday = events;
   let uniqueEvents = events;
   if (date) {
-    filteredByDate  = filteredByDate.filter(event => new Date(event.startdate).toDateString() === new Date(date).toDateString());
+    filteredByDate = filteredByDate.filter(event => {
+      const eventStartDate = new Date(event.startdate);
+      const eventEndDate = new Date(event.enddate);
+      const inputDate = new Date(date);
+    
+      return inputDate >= eventStartDate && inputDate <= eventEndDate && !event.repeat;
+    });    
     const inputdate = new Date(date);  // 将日期字符串转换为 Date 对象
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayIndex = inputdate.getDay(); 
@@ -120,7 +123,7 @@ const handleAddEventOpen = () => {
       startTime: '',
       endTime: '',
       organizer: userName,
-      location: '',
+      location: userAddress,
       capacity: 0,
       level: '',
       isFree: false,
@@ -318,18 +321,12 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
       <TopNavBar
         isLoggedIn={isLoggedIn}
         userName={userName}
+        userRole={userRole}
+        userEmail={userEmail}
         anchorEl={anchorEl}
         open={open}
-        handleMenuOpen={(e) => setAnchorEl(e.currentTarget)}
-        handleMenuClose={() => setAnchorEl(null)}
-        handleLogout={() => {
-          setIsLoggedIn(false);
-          localStorage.removeItem('userEmail');
-          localStorage.removeItem('userRole');
-          window.location.href = '/login';
-        }}
-        setIsChangePasswordOpen={setIsChangePasswordOpen}
-        setIsEditProfileOpen={setIsEditProfileOpen}
+        setIsLoggedIn={setIsLoggedIn}
+        setAnchorEl={setAnchorEl}
       />
        {/* 日期选择*/}
       <Box sx={{ display: 'flex', gap: 2, mb: 2 ,mt : 4  }}>
@@ -375,11 +372,13 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
             </Grid>
             <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               {event.images && event.images.length > 0 && (
+                <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <img
                    src={`${apiBaseUrl}/${event.images[0].imagePath}`}
                    alt="Event"
-                    style={{ width: 'auto', height: 'auto', maxHeight: '150px', objectFit: 'cover' }}
-                  />)}
+                    style={{ width: '100%', height: 'auto', maxHeight: '150px', objectFit: 'contain' }}
+                  />
+                  </div>)}
               </Grid>
             </Grid>
             {/*导出预约信息按钮 */}
@@ -428,18 +427,6 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
           <Button onClick={handleDeleteEvent} color="error">Delete</Button>
         </DialogActions>
       </Dialog>
-      <ChangePasswordDialog
-        open={isChangePasswordOpen}
-        onClose={handleChangePasswordClose(setIsChangePasswordOpen, handleMenuClose(setAnchorEl))}
-        userEmail={userEmail}
-      />
-
-      <EditProfileDialog
-        open={isEditProfileOpen}
-        onClose={handleEditProfileClose(setIsEditProfileOpen, handleMenuClose(setAnchorEl))}
-        userEmail={userEmail}
-        role={userRole}
-      />
       <ExportDialog
         open={openExportDialog}
         onClose={() => setOpenExportDialog(false)}

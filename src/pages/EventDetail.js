@@ -101,7 +101,7 @@ const EventDetail = () => {
             <Box className="event-image-container">
             {/* Display the current image */}
             <img
-              src={`${apiBaseUrl}/${event.images[currentImageIndex].imagePath}`}
+              src={`${event.images[currentImageIndex].imagePath}`}
               alt={`Event Image ${currentImageIndex + 1}`}
               className="event-image"
             />

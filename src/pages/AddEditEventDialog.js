@@ -63,6 +63,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
 
   const handleEvent = () => {
     const formData = new FormData();
+    formData.append('email', newEvent.email);
     formData.append('title', newEvent.title);
     formData.append('startdate', newEvent.startdate);
     formData.append('enddate', newEvent.enddate);

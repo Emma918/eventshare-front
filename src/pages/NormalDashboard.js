@@ -312,7 +312,7 @@ return (
                          {event.images && event.images.length > 0 && (
                            <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                            <img
-                            src={`${apiBaseUrl}/${event.images[0].imagePath}`}
+                            src={`${event.images[0].imagePath}`}
                             alt="Event"
                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                            />

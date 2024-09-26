@@ -137,7 +137,7 @@ function HomePage() {
                     <Box className="event-image-container">
                       <div style={{ width: '260px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       <img
-                        src={`${apiBaseUrl}/${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
+                        src={`${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
                         alt={`Event Image ${getCurrentImageIndex(item.eventId) + 1}`}
                         className="event-image"
                       />

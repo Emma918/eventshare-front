@@ -28,13 +28,12 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
         })
         .then((data) => {
           setAvailableDates(data);
-          console.log(availableDates);
         })
         .catch((error) => {
           console.error('Error fetching dates:', error);
         });
     }
-  }, [event]);
+  }, [apiBaseUrl,event]);
 
   useEffect(() => {
     if (normalUserDetail) {

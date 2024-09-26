@@ -53,12 +53,12 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchEvents = async () => {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${apiBaseUrl}/api/events`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${apiBaseUrl}/api/events/${userEmail}`, { headers: { Authorization: `Bearer ${token}` } });
       setEvents(response.data);
       setFilteredEvents(response.data);  // 默认显示所有活动
     };
     fetchEvents();
-  }, []);
+  }, [apiBaseUrl,userEmail]);
 // 获取用户详细信息
 useEffect(() => {
   const fetchUserDetails = async () => {
@@ -75,7 +75,7 @@ useEffect(() => {
   if (userEmail) {
     fetchUserDetails();  // 如果用户邮箱存在，则获取详细信息
   }
-}, [userEmail,adminUserDetail]);
+}, [apiBaseUrl,userEmail,adminUserDetail]);
 
 // 根据日期过滤活动
 const filterEvents = () => {
@@ -106,7 +106,7 @@ const filterEvents = () => {
 const refreshEvents = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${apiBaseUrl}/api/events`, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await axios.get(`${apiBaseUrl}/api/events/${userEmail}`, { headers: { Authorization: `Bearer ${token}` } });
     setEvents(response.data);
     setFilteredEvents(response.data);  // 默认显示所有活动
   } catch (error) {
@@ -117,6 +117,7 @@ const refreshEvents = async () => {
 const handleAddEventOpen = () => {
     setNewEvent({
       category:'',
+      email:userEmail,
       title: '',
       startdate: '',
       enddate: '',
@@ -238,6 +239,7 @@ const handleAddEventOpen = () => {
   const handleCopyEvent = (event) => {
     setNewEvent({
       title: event.title,//标题
+      email:userEmail,
       startdate: event.startdate || '',  // 开始日期
       enddate: event.enddate || '',  // 结束日期
       startTime: event.startTime || '',  // 开始时间
@@ -374,7 +376,7 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
               {event.images && event.images.length > 0 && (
                 <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <img
-                   src={`${apiBaseUrl}/${event.images[0].imagePath}`}
+                   src={`${event.images[0].imagePath}`}
                    alt="Event"
                     style={{ width: '100%', height: 'auto', maxHeight: '150px', objectFit: 'contain' }}
                   />

@@ -1,6 +1,5 @@
 // src/pages/EventDetail.js
 import React, { useEffect, useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import '../App.css';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -42,7 +41,9 @@ const EventDetail = () => {
     // Fetch event details using the event ID
     const fetchEventDetails = async () => {
       try {
+        console.log('OKOKOK',`${apiBaseUrl}/api/events/${eventId}`);
         const response = await axios.get(`${apiBaseUrl}/api/events/${eventId}`);
+        console.log('eventdetail',response.data);
         setEvent(response.data);
       } catch (error) {
         console.error('Error fetching event details:', error);

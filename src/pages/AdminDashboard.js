@@ -53,7 +53,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchEvents = async () => {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${apiBaseUrl}/api/events/${userEmail}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(`${apiBaseUrl}/api/events/email/${userEmail}`, { headers: { Authorization: `Bearer ${token}` } });
       setEvents(response.data);
       setFilteredEvents(response.data);  // 默认显示所有活动
     };

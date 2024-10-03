@@ -36,6 +36,7 @@ function AdminDashboard() {
   const eventsPerPage = 5; 
   const [newEvent, setNewEvent] = useState({
     category:'',
+    email: '',
     title: '',
     startdate: '',
     enddate: '',
@@ -106,7 +107,7 @@ const filterEvents = () => {
 const refreshEvents = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${apiBaseUrl}/api/events/${userEmail}`, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await axios.get(`${apiBaseUrl}/api/events/email/${userEmail}`, { headers: { Authorization: `Bearer ${token}` } });
     setEvents(response.data);
     setFilteredEvents(response.data);  // 默认显示所有活动
   } catch (error) {
@@ -157,6 +158,7 @@ const handleAddEventOpen = () => {
   const handleEditEventOpen = (event) => {
     setNewEvent({
       eventId:event.eventId,
+      email:event.email,
       title: event.title,
       startdate: event.startdate || '',  // 日期
       enddate: event.enddate || '',  // 日期
@@ -384,9 +386,10 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
               </Grid>
             </Grid>
             {/*导出预约信息按钮 */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+            {event.reserve &&(
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <Button variant="outlined" onClick={() => handleExportReservations(event.eventId,event.repeat,event.weekday)}><FileDownload /> Export Reservations</Button>
-            </Box>
+            </Box>)}
           </CardContent>
         </Card>
       )))}

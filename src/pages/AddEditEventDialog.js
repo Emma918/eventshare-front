@@ -132,7 +132,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
         <input type="file"name="images"accept="image/*"multiple onChange={handleImageChange}/>
          { existingImages&& existingImages.map((image, index) => (
           <Box key={index} sx={{ mt: 2, position: 'relative' }}>
-            <img src={`${apiBaseUrl}/${image.imagePath}`} alt={`Existing  ${index}`} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+            <img src={`${image.imagePath}`} alt={`Existing  ${index}`} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
             <IconButton sx={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'white', borderRadius: '50%' }}onClick={() => handleDeleteExistingImage(index)}size="small"><Delete /></IconButton>
           </Box>
         ))}

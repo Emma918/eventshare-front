@@ -174,9 +174,6 @@ function HomePage() {
                       {item.location}
                     </a>
                   </Typography>
-                  <Typography variant="body2" className="event-info">
-                    <strong>Capacity:</strong> {item.capacity}
-                  </Typography>
                 </CardContent>
                 <CardActions className="card-actions">
                   <Button variant="contained" component={Link} to={`/events/${item.eventId}`} className="button">

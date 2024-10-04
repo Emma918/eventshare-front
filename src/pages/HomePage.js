@@ -83,7 +83,15 @@ function HomePage() {
         .then(() => console.log('Event shared successfully'))
         .catch((error) => console.error('Error sharing the event:', error));
     } else {
-      alert('Web Share API is not supported in this browser.');
+      const fallbackUrl = `${apiBaseUrl}/events/${item.eventId}`;
+    navigator.clipboard.writeText(fallbackUrl)
+      .then(() => {
+        alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');
+      })
+      .catch((error) => {
+        console.error('Error copying URL to clipboard:', error);
+        alert('Web Share API is not supported in this browser. Unable to share the event.');
+      });
     }
   };
 

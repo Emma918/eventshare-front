@@ -297,15 +297,20 @@ return (
                         <Typography variant="h6">{event.title}</Typography>
                         <Typography variant="body2"> 
                           {event.organizer}<br />
-                          Date: {event.repeat ?`Every ${event.weekday}` : event.startdate===event.enddate?event.startdate:`${event.startdate} ~ ${event.enddate}`}  <br />
-                          Time:{event.startTime} -- {event.endTime} <br />
+                          Date: {event.repeat ?`Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate===event.enddate?event.startdate:`${event.startdate} ~ ${event.enddate}`}  <br />
+                          Time:{event.startTime} ~ {event.endTime} <br />
                           Location: {event.location} <br />
                           Capacity: {event.capacity} <br />
                           Level: {event.levelname} <br />
                           Free: {event.isFree ? 'Yes' : 'No'} <br />
                           {event.reserve ? 'Reservation Required' : 'No Reservation Required'} <br />
-                          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }}/> <br />
-                          </Typography>
+                          <Typography variant="body2" component="div" sx={{
+                           whiteSpace: 'nowrap',overflow: 'hidden',textOverflow: 'ellipsis', display: '-webkit-box',
+                           WebkitLineClamp: 1,
+                           WebkitBoxOrient: 'vertical',}}>
+                           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
+                           </Typography><br />
+                        </Typography>
                       </Grid>
                       {/* Right side: Event image */}
                       <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

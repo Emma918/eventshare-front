@@ -11,6 +11,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddEditEventDialog from './AddEditEventDialog';  // 新增活动对话框
 import ExportDialog from './ExportDialog'; 
+import { Link } from 'react-router-dom';
 function AdminDashboard() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [date, setDate] = useState(null);
@@ -362,12 +363,13 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
                 <IconButton onClick={() => handleDeleteEventOpen(event)}><Delete /></IconButton>
               </Box>
             </Box>
+            <Link to={`/events/${event.eventId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <Grid container spacing={2}>
             <Grid item xs={6}>
             <Typography sx={{ color: 'gray' }}> {event.organizer}</Typography>
             {/* 静态显示详细信息 */}
-            <Typography><strong>Date:</strong> {event.repeat ?`Every ${event.weekday}` : event.startdate===event.enddate?event.startdate:`${event.startdate} ~ ${event.enddate}`}</Typography>
-            <Typography><strong>Time:</strong> {event.startTime} -- {event.endTime}</Typography>
+            <Typography><strong>Date:</strong> {event.repeat ?`Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate===event.enddate?event.startdate:`${event.startdate} ~ ${event.enddate}`}</Typography>
+            <Typography><strong>Time:</strong> {event.startTime} ~ {event.endTime}</Typography>
             <Typography><strong>Location:</strong> {event.location}</Typography>
             <Typography><strong>Capacity:</strong> {event.capacity}</Typography>
             <Typography><strong>Level:</strong> {event.levelname}</Typography>
@@ -385,6 +387,7 @@ const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
                   </div>)}
               </Grid>
             </Grid>
+            </Link>
             {/*导出预约信息按钮 */}
             {event.reserve &&(
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>

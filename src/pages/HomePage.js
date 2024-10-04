@@ -165,8 +165,8 @@ function HomePage() {
                     <strong>Organizer:</strong> {item.organizer}
                   </Typography>
                   <Typography variant="body2" className="event-info">
-                    <strong>Date:</strong> {item.repeat ? `Every ${item.weekday}` : item.startdate === item.enddate ? item.startdate : `${item.startdate} ~ ${item.enddate}`}<br />
-                    <strong>Time:</strong> {item.startTime}-{item.endTime}
+                    <strong>Date:</strong> {item.repeat ? `Every ${item.weekday}(${item.startdate} ~ ${item.enddate})` : item.startdate === item.enddate ? item.startdate : `${item.startdate} ~ ${item.enddate}`}<br />
+                    <strong>Time:</strong> {item.startTime} ~ {item.endTime}
                   </Typography>
                   <Typography variant="body2" className="event-info">
                     <strong>Location:</strong>

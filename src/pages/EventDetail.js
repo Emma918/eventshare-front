@@ -41,9 +41,7 @@ const EventDetail = () => {
     // Fetch event details using the event ID
     const fetchEventDetails = async () => {
       try {
-        console.log('OKOKOK',`${apiBaseUrl}/api/events/${eventId}`);
         const response = await axios.get(`${apiBaseUrl}/api/events/${eventId}`);
-        console.log('eventdetail',response.data);
         setEvent(response.data);
       } catch (error) {
         console.error('Error fetching event details:', error);
@@ -135,12 +133,11 @@ const EventDetail = () => {
        </IconButton>
       </Box>
       <Typography variant="body1"><strong>Organizer:</strong>{event.organizer}</Typography>
-      <Typography variant="body1"><strong>Date:</strong> {event.repeat ?`Every ${event.weekday}` 
+      <Typography variant="body1"><strong>Date:</strong> {event.repeat ?`Every ${event.weekday} (${event.startdate} ~ ${event.enddate})` 
               : event.startdate===event.enddate?
               event.startdate
               :`${event.startdate} ~ ${event.enddate}`}<br/></Typography>
-      <Typography variant="body1"><strong>Start Time:</strong> {event.startTime}</Typography>
-      <Typography variant="body1"><strong>End Time:</strong> {event.endTime}</Typography>
+      <Typography variant="body1"><strong>Time:</strong> {event.startTime} ~ {event.endTime}</Typography>
       <Typography variant="body1"><strong>Location:</strong> 
       <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
         target="_blank" 

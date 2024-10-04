@@ -14,6 +14,7 @@ import ExportDialog from './ExportDialog';
 import { Link } from 'react-router-dom';
 function AdminDashboard() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
   const [date, setDate] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -229,12 +230,20 @@ const handleAddEventOpen = () => {
         .share({
           title: event.title,
           text: `Check out this event: ${event.title}`,
-          url: `${apiBaseUrl}/events/${event.eventId}`,
+          url: `${apiAppUrl}/events/${event.eventId}`,
         })
         .then(() => console.log('Event shared successfully'))
         .catch((error) => console.error('Error sharing the event:', error));
     } else {
-      alert('Web Share API is not supported in this browser.');
+      const fallbackUrl = `${apiAppUrl}/events/${event.eventId}`;
+      navigator.clipboard.writeText(fallbackUrl)
+        .then(() => {
+          alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');
+        })
+        .catch((error) => {
+          console.error('Error copying URL to clipboard:', error);
+          alert('Web Share API is not supported in this browser. Unable to share the event.');
+        });
     }
   };
 

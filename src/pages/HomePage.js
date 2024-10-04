@@ -8,6 +8,7 @@ import ShareIcon from '@mui/icons-material/Share';
 
 function HomePage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
   const [events, setEvents] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [userName, setUserName] = useState('');
@@ -78,12 +79,12 @@ function HomePage() {
         .share({
           title: item.title,
           text: `Check out this event: ${item.title}`,
-          url: `${apiBaseUrl}/events/${item.eventId}`,
+          url: `${apiAppUrl}/events/${item.eventId}`,
         })
         .then(() => console.log('Event shared successfully'))
         .catch((error) => console.error('Error sharing the event:', error));
     } else {
-      const fallbackUrl = `${apiBaseUrl}/events/${item.eventId}`;
+      const fallbackUrl = `${apiAppUrl}/events/${item.eventId}`;
     navigator.clipboard.writeText(fallbackUrl)
       .then(() => {
         alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');

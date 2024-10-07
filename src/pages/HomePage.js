@@ -237,7 +237,7 @@ function HomePage() {
                    <FavoriteBorderIcon /> // Not liked state (outline heart)
                     )}
                   </IconButton>
-                  <Typography variant="body2">{item.likes}</Typography>
+                  {item.likes>0 &&  (<Typography variant="body2">{item.likes}</Typography>)}
                 </CardActions>
               </Card>
             </Grid>

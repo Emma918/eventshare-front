@@ -186,7 +186,7 @@ const EventDetail = () => {
         <FavoriteBorderIcon /> // Not liked state (outline heart)
       )}
     </IconButton>
-    <Typography variant="body2">{event.likes}</Typography>
+    {event.likes>0 &&  (<Typography variant="body2">{event.likes}</Typography>)}
   </Box>
   </Box>
       <Typography variant="body1"><strong>Organizer:</strong>{event.organizer}</Typography>

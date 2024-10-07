@@ -5,7 +5,8 @@ import { Box, Button, Card, CardContent, CardActions, Typography, Grid, IconButt
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ShareIcon from '@mui/icons-material/Share';
-
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 function HomePage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
@@ -14,6 +15,7 @@ function HomePage() {
   const [userName, setUserName] = useState('');
   const userEmail = localStorage.getItem('userEmail');
   const userRole = localStorage.getItem('userRole');
+  const userId= localStorage.getItem('userId');
   const [isLoggedIn, setIsLoggedIn] = useState(!!userEmail);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
@@ -44,7 +46,17 @@ function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const eventsResponse = await axios.get(`${apiBaseUrl}/api/events`);
+        let eventsResponse;
+        if(isLoggedIn){
+          eventsResponse = await axios.get(`${apiBaseUrl}/api/events`, {
+            params: {
+              userId: userId
+            }
+          });
+      }
+        else{
+          eventsResponse = await axios.get(`${apiBaseUrl}/api/events`);
+        }
         setEvents(eventsResponse.data);
         setFilteredData([...eventsResponse.data]);
       } catch (error) {
@@ -74,6 +86,7 @@ function HomePage() {
   };
 
   const handleShareEvent = (item) => {
+    if(isLoggedIn){
     if (navigator.share) {
       navigator
         .share({
@@ -93,6 +106,9 @@ function HomePage() {
         console.error('Error copying URL to clipboard:', error);
         alert('Web Share API is not supported in this browser. Unable to share the event.');
       });
+    }}
+    else{
+      alert("Please login first!");
     }
   };
 
@@ -113,7 +129,31 @@ function HomePage() {
       setCurrentPage(currentPage - 1);
     }
   };
-
+  const handleLike = async (eventId) => {
+    if (isLoggedIn) {
+      try {
+        // Send a request to the backend to update the like count for the event
+        const response = await axios.post(`${apiBaseUrl}/api/events/${eventId}/like`, { userId });
+        
+        // Update the local event state with the new like count
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.eventId === eventId
+              ? { ...event, likes: response.data.likes, liked: response.data.liked } // update likes and liked state
+              : event
+          )
+        );
+        setFilteredData(events);
+      } catch (error) {
+        console.error('Error updating like:', error);
+      }
+    } else {
+      alert("Please login first!");
+    }
+  };  
+  useEffect(() => {
+    setFilteredData(events);
+  }, [events]);
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = filteredData.slice(indexOfFirstEvent, indexOfLastEvent);
@@ -130,7 +170,6 @@ function HomePage() {
         setIsLoggedIn={setIsLoggedIn}
         setAnchorEl={setAnchorEl}
       />
-
       {/* Display filtered events */}
       <Grid container spacing={4} className="card-container">
         {currentEvents.length === 0 ? (
@@ -191,6 +230,14 @@ function HomePage() {
                   <IconButton className="button" onClick={() => handleShareEvent(item)}>
                     <ShareIcon />
                   </IconButton>
+                  <IconButton className="like-button" onClick={() => handleLike(item.eventId)}>
+                    {item.liked ? (
+                      <FavoriteIcon style={{ color: 'red' }} /> // Liked state (red heart)
+                     ) : (
+                   <FavoriteBorderIcon /> // Not liked state (outline heart)
+                    )}
+                  </IconButton>
+                  <Typography variant="body2">{item.likes}</Typography>
                 </CardActions>
               </Card>
             </Grid>

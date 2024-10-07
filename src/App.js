@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import RegisterPage from './pages/RegisterPageForNormal';
 import AdminDashboard from './pages/AdminDashboard';
 import NormalDashboard from './pages/NormalDashboard';
 import HomePage from './pages/HomePage';  

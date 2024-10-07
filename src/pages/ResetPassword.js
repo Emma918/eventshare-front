@@ -74,7 +74,7 @@ const ResetPassword = () => {
         onChange={(e) => setConfirmPassword(e.target.value)}
         margin="normal"
       />
-      <Button
+      <Button className="button"
         variant="contained"
         color="primary"
         fullWidth

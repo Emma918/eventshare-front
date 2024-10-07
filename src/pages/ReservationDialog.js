@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef  } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle,FormControl,InputLabel, Button, MenuItem, TextField, Select, Grid, Box } from '@mui/material';
 import axios from 'axios';
 
@@ -34,9 +34,9 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
         });
     }
   }, [apiBaseUrl,event]);
-
+  const isInitialized = useRef(false);
   useEffect(() => {
-    if (normalUserDetail) {
+    if (normalUserDetail && !isInitialized.current) {
       setReservation((prev) => ({
         ...prev,
         name: normalUserDetail.name || '',
@@ -46,16 +46,9 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
         nationality: normalUserDetail.nationality || '',
         firstLanguage: normalUserDetail.firstLanguage || ''
       }));
-    }
-    //if (event) {
-    //  setReservation((prev) => ({
-    //    ...prev,
-    //    eventId: event.eventId || '',  // Make sure eventId is set
-   //     date: event.repeat ? '' : event.date,  // Set date if not repeating
-    //  }));
-   // }
-    
-  }, [normalUserDetail,event]);
+      isInitialized.current = true;
+    } 
+  }, [normalUserDetail]);
 
   const handleChange = (e) => {
     setReservation({ ...reservation, [e.target.name]: e.target.value });
@@ -71,7 +64,6 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
 
   const handleSubmit = async () => {
     try {
-      console.log('reservation:',reservation);
       await axios.post(`${apiBaseUrl}/api/events/reservations/${event.eventId}`, reservation);
       alert('Reservation successful!');
       refreshReservedEvents(); // Refresh reserved events after a successful reservation
@@ -203,7 +195,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
       <Button onClick={onClose} variant="outlined">
         Cancel
       </Button>
-      <Button onClick={handleSubmit} variant="contained" color="primary">
+      <Button className='button' onClick={handleSubmit} variant="contained" color="primary">
         Reserve
       </Button>
     </DialogActions>

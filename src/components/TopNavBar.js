@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Button, Box, Typography, IconButton, Menu, MenuItem, Drawer, List, ListItem } from '@mui/material';
+import { AppBar, Toolbar, Button, Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import MenuIcon from '@mui/icons-material/Menu'; // 导入菜单图标
 import '../App.css';
 import { Link } from 'react-router-dom';
 import ChangePasswordDialog from '../pages/ChangePasswordDialog';
@@ -10,7 +9,6 @@ import EditProfileDialog from '../pages/EditProfileDialog';
 const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, setIsLoggedIn, setAnchorEl }) => {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);  // 控制 Drawer 的状态
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -32,24 +30,53 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
   };
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
-  const handleDrawerOpen = () => setDrawerOpen(true);  // 打开 Drawer
-  const handleDrawerClose = () => setDrawerOpen(false);  // 关闭 Drawer
 
   return (
     <AppBar position="static" className="nav-bar">
-      <Toolbar>
-        {/* 左侧导航按钮 */}
-        <Box sx={{ flexGrow: 1, display: 'flex' }}>
-          <Button color="inherit" className="nav-button" href="/">Home</Button>
-          <Button color="inherit" className="nav-button" onClick={handleEventsOpen}>Events</Button>
+      <Toolbar sx={{ whiteSpace: 'nowrap', overflow: 'hidden', justifyContent: 'space-between' }}>
+        {/* Left-aligned navigation links */}
+        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+          <Button 
+            color="inherit" 
+            className="nav-button" 
+            href="/" 
+            sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
+          >
+            Home
+          </Button>
+          <Button 
+            color="inherit" 
+            className="nav-button" 
+            onClick={handleEventsOpen} 
+            sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
+          >
+            Events
+          </Button>
         </Box>
 
-        {/* 右侧登录或用户信息按钮 */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
-          <Button color="inherit" className="nav-button" component={Link} to="/contact-us">Contact Us</Button>
+        {/* Right-aligned login or user info */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'flex-end',
+            fontSize: { xs: '0.75rem', sm: '1rem' },
+            padding: { xs: '4px', sm: '10px' },
+            gap: '8px'  // Add small gap between buttons
+          }}
+        >
+          <Button 
+            color="inherit" 
+            className="nav-button" 
+            component={Link} 
+            to="/contact-us"
+            sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
+          >
+            Contact Us
+          </Button>
           {isLoggedIn ? (
             <>
-              <Typography variant="body1" sx={{ mr: 2 }}>{userName}</Typography>
+              <Typography variant="body1" sx={{ mr: 2, fontSize: { xs: '0.75rem', sm: '1rem' } }}>{userName}</Typography>
               <IconButton size="large" edge="end" color="inherit" onClick={handleMenuOpen}>
                 <AccountCircle />
               </IconButton>
@@ -61,27 +88,25 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
             </>
           ) : (
             <>
-              <Button color="inherit" className="nav-button" href="/login">Log in</Button>
-              <Button color="inherit" className="nav-button" href="/register">Sign up</Button>
+              <Button 
+                color="inherit" 
+                className="nav-button" 
+                href="/login"
+                sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
+              >
+                Log in
+              </Button>
+              <Button 
+                color="inherit" 
+                className="nav-button" 
+                href="/register"
+                sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
+              >
+                Sign up
+              </Button>
             </>
           )}
         </Box>
-
-        {/* 小屏幕下的抽屉按钮 */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
-          <IconButton size="large" edge="end" color="inherit" onClick={handleDrawerOpen}>
-            <MenuIcon /> {/* 菜单图标 */}
-          </IconButton>
-        </Box>
-
-        {/* Drawer 组件 */}
-        <Drawer anchor="right" open={drawerOpen} onClose={handleDrawerClose}>
-         <List>
-         <ListItem button component={Link} to="/login" className="nav-button">Log in</ListItem>
-         <ListItem button component={Link} to="/register" className="nav-button">Sign up</ListItem>
-         <ListItem button component={Link} to="/contact-us" className="nav-button">Contact Us</ListItem>
-         </List>
-       </Drawer>
       </Toolbar>
 
       <ChangePasswordDialog

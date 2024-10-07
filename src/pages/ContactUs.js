@@ -92,7 +92,7 @@ const ContactUs = () => {
         onChange={(e) => setMessage(e.target.value)}
         margin="normal"
       />
-      <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 2 }}>
+      <Button className='button' variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 2 }}>
         Send Message
       </Button>
     </Container>

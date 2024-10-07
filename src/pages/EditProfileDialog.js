@@ -134,7 +134,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
               <>
                 <Grid item xs={12}>
                   <TextField
-                    label="admin Name"
+                    label="Name"
                     name="adminName"
                     value={profile.adminName}
                     onChange={handleChange}
@@ -154,7 +154,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="Admin Phone"
+                    label="Phone"
                     name="adminPhone"
                     value={profile.adminPhone}
                     onChange={handleChange}
@@ -171,7 +171,7 @@ const EditProfileDialog = ({ open, onClose, userEmail, role }) => {
         <Button onClick={onClose} variant="outlined">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
+        <Button className='button' onClick={handleSubmit} variant="contained" color="primary">
           Save
         </Button>
       </DialogActions>

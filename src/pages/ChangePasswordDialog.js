@@ -101,7 +101,7 @@ const ChangePasswordDialog = ({ open, onClose, userEmail }) => {
         <Button onClick={onClose} variant="outlined">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
+        <Button className='button' onClick={handleSubmit} variant="contained" color="primary">
           Change
         </Button>
       </DialogActions>

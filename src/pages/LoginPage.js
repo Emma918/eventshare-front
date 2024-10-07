@@ -1,97 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { Tabs, Tab, Box, TextField, Button, Typography, Container } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, TextField, Button, Typography, Container, IconButton} from '@mui/material';
 import axios from 'axios';
-
-function LoginPage({ setUserRole }) {
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate, useLocation  } from 'react-router-dom';
+import '../App.css';
+function LoginPage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
-  const googleclientID = process.env.REACT_APP_API_GOOGLE_CLIENT_ID;
-  const [selectedTab, setSelectedTab] = useState(0);  // 0 = Normal, 1 = Admin
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  console.log('apiBaseUrl',apiBaseUrl);
-  console.log('googleclientID',googleclientID);
- {/* 
-  useEffect(() => {
-    // Load Facebook SDK
-    window.fbAsyncInit = function() {
-      window.FB.init({
-        appId: 'YOUR_FACEBOOK_APP_ID',
-        cookie: true,
-        xfbml: true,
-        version: 'v12.0',
-      });
-    };
-
-    // Load Apple SDK
-    const script = document.createElement('script');
-    script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-*/}
-  const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
-  };
+  const navigate = useNavigate();  // Initialize useNavigate
+  const location = useLocation();
   const handleLogin = async () => {
     try {
-      const role = selectedTab === 0 ? 'normal' : 'admin';
-      const response = await axios.post(`${apiBaseUrl}/auth/login`, { email, password, role });
+      const response = await axios.post(`${apiBaseUrl}/auth/login`, { email, password});
+      // Extract token and role from the response
+      const { token, role,userId } = response.data;
       localStorage.setItem('userRole', role);  // 保存用户角色
       localStorage.setItem('userEmail', email);  // 保存用户角色
-      setUserRole(role);
-      if (role === 'admin') {
-        window.location.href = '/admin-dashboard';
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('token', token)
+      // Check if the user was coming from the registration page
+      const fromRegistration = location.state?.from === '/register';
+
+      // Redirect based on the previous location
+      if (fromRegistration && location.state?.prevPage) {
+      navigate(location.state.prevPage); // Navigate to the page before registration
       } else {
-        window.location.href = '/normal-dashboard';
+      navigate(location.state?.from || -1); // Navigate to previous page or fallback to last page
       }
     } catch (error) {
       setError('Login failed. Please check your credentials.');
     }
   };
 
-  const handleGoogleSuccess = async (response) => {
-    try {
-      const result = await axios.post(`${apiBaseUrl}/auth/google-login`, {
-        token: response.credential,
-      });
-
-      const { role, email } = result.data;
-      localStorage.setItem('userRole', role);
-      localStorage.setItem('userEmail', email);
-      setUserRole(role);
-
-      if (role === 'admin') {
-        window.location.href = '/admin-dashboard';
-      } else {
-        window.location.href = '/normal-dashboard';
-      }
-    } catch (error) {
-      setError('Google login failed.');
-    }
+  // Handle go back action
+  const handleGoBack = () => {
+    navigate(-1);  // This navigates back to the previous page
   };
-{/*
-  const handleFacebookLogin = () => {
-    window.FB.login(function(response) {
-      if (response.authResponse) {
-        console.log('Facebook login success', response);
-        // Handle Facebook login on server-side
-      }
-    }, { scope: 'public_profile,email' });
-  };
-
-  const handleAppleLogin = () => {
-    window.AppleID.auth.init({
-      clientId: 'YOUR_APPLE_CLIENT_ID',
-      scope: 'name email',
-      redirectURI: 'YOUR_REDIRECT_URI',
-      state: 'STATE',
-      usePopup: true,
-    });
-    window.AppleID.auth.signIn();
-  };
-*/}
   return (
     <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2,mt : 4  }}>
       <Box
@@ -100,17 +46,22 @@ function LoginPage({ setUserRole }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          position: 'relative' // To position the Go Back button
         }}
       >
-        <Typography component="h1" variant="h5">
+        {/* Go Back button aligned to the left */}
+        <IconButton className="button" 
+          sx={{ position: 'absolute', left: 0, top: 0 }}
+          onClick={handleGoBack}
+          color="primary"
+        >
+          <ArrowBackIcon /> {/* Arrow back icon */}
+        </IconButton>
+
+        {/* Centered Login heading */}
+        <Typography component="h1" variant="h5" sx={{ textAlign: 'center', width: '100%' }}>
           Login
         </Typography>
-
-        {/* Tabs for Admin/Normal */}
-        <Tabs value={selectedTab} onChange={handleTabChange} aria-label="user type tabs">
-          <Tab label="Normal User" />
-          <Tab label="Admin User" />
-        </Tabs>
 
         <Box component="form" noValidate sx={{ mt: 1 }}>
           <TextField
@@ -131,17 +82,18 @@ function LoginPage({ setUserRole }) {
             fullWidth
             name="password"
             label="Password"
-            type="password"
+            type= 'password'  // Toggle between text and password types
             id="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+
           />
           <Typography variant="body2" sx={{ mt: 1 }}>
-          Forgot your password? <a href="/forgot-password">Reset here</a>
+            Forgot your password? <a href="/forgot-password">Reset here</a>
           </Typography>
           {error && <Typography color="error">{error}</Typography>}
-          <Button
+          <Button className="button" 
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
@@ -150,32 +102,6 @@ function LoginPage({ setUserRole }) {
             Sign In
           </Button>
         </Box>
-{/*
-        <GoogleOAuthProvider clientId={googleclientID}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => console.log('Google Login Failed')}
-          />
-        </GoogleOAuthProvider>
-        
-        <Button
-          fullWidth
-          variant="outlined"
-          sx={{ mt: 2 }}
-          onClick={handleFacebookLogin}
-        >
-          Sign in with Facebook
-        </Button>
-        <Button
-          fullWidth
-          variant="outlined"
-          sx={{ mt: 2 }}
-          id="appleid-signin"
-          onClick={handleAppleLogin}
-        >
-          Sign in with Apple
-        </Button>
-*/}
         <Typography variant="body2" sx={{ mt: 1}}>
           New user? <a href="/register">Register here</a>
         </Typography>

@@ -148,7 +148,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
           <FormControlLabel control={<Checkbox checked={newEvent.reserve} onChange={(e) => setNewEvent({ ...newEvent, reserve: e.target.checked })} />} label="Reserve need?" /> 
           <FormControlLabel control={<Checkbox checked={newEvent.repeat} onChange={(e) => setNewEvent({ ...newEvent, repeat: e.target.checked })} />} label="Repeat Weekly" />
         </Box>
-        <Button variant="contained" onClick={handleEvent} fullWidth>{isEdit ? 'Save Changes' : 'Add Event'}</Button>
+        <Button className='button' variant="contained" onClick={handleEvent} fullWidth>{isEdit ? 'Save Changes' : 'Add Event'}</Button>
       </Box>
     </Dialog>
   );

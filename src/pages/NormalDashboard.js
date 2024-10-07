@@ -329,7 +329,7 @@ return (
                     </Link>
                     <CardActions>
                     {event.reserve && (event.isFull ? ( <Typography variant="body1" color="error">Fully Reserved</Typography>) : (
-                      <Button variant="outlined" onClick={() => handleReserveClick(event)}>
+                      <Button className='button' variant="contained" onClick={() => handleReserveClick(event)}>
                        Reserve
                       </Button> ))}
                     </CardActions>

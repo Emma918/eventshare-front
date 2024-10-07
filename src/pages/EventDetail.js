@@ -7,6 +7,8 @@ import { Box, Typography, Button,IconButton } from '@mui/material';
 import TopNavBar from '../components/TopNavBar';
 import ShareIcon from '@mui/icons-material/Share';
 import DOMPurify from 'dompurify';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
 const EventDetail = () => {
@@ -15,6 +17,7 @@ const EventDetail = () => {
   const [userName, setUserName] = useState('');  // 初始化 userName 为空字符串
   const userEmail = localStorage.getItem('userEmail');  //用户的邮箱
   const userRole= localStorage.getItem('userRole');  //用户角色
+  const userId= localStorage.getItem('userId');
   const [isLoggedIn, setIsLoggedIn] = useState(!!userEmail);  // 检查是否已登录
   const [anchorEl, setAnchorEl] = useState(null);  // 控制菜单
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track the currently displayed image
@@ -42,7 +45,17 @@ const EventDetail = () => {
     // Fetch event details using the event ID
     const fetchEventDetails = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/events/${eventId}`);
+        let response;
+        if(isLoggedIn){
+        response = await axios.get(`${apiBaseUrl}/api/events/${eventId}`, {
+          params: {
+            userId: userId
+          }
+        });
+    }
+      else{
+        response = await axios.get(`${apiBaseUrl}/api/events/${eventId}`);
+      }
         setEvent(response.data);
       } catch (error) {
         console.error('Error fetching event details:', error);
@@ -70,6 +83,7 @@ const EventDetail = () => {
     );
   };
   const handleShareEvent = (event) => {
+    if(isLoggedIn){
     if (navigator.share) {
       navigator
         .share({
@@ -89,8 +103,29 @@ const EventDetail = () => {
           console.error('Error copying URL to clipboard:', error);
           alert('Web Share API is not supported in this browser. Unable to share the event.');
         });
-    }
+    }}else{
+    alert("Please login first!");
+  }
   };
+  const handleLike = async (eventId) => {
+    if (isLoggedIn) {
+      try {
+        // Send a request to the backend to update the like count for the event
+        const response = await axios.post(`${apiBaseUrl}/api/events/${eventId}/like`, { userId });
+        
+        // Update the local event state with the new like count
+        setEvent((prevEvent) => ({
+          ...prevEvent,  // Spread the previous event properties
+          likes: response.data.likes,  // Update the likes count
+          liked: response.data.liked,  // Update the liked status
+        }));
+      } catch (error) {
+        console.error('Error updating like:', error);
+      }
+    } else {
+      alert("Please login first!");
+    }
+  };  
   return (
     <div className="container">
        {/* 顶端任务栏 */}
@@ -133,14 +168,27 @@ const EventDetail = () => {
             </Button>
           </Box>
       )}
-      <Box className="event-header" sx={{ mt: 2 }}>
-       <Typography className="event-title" variant="h5">
-       {event.title}
-       </Typography>
-       <IconButton className="event-share-btn" onClick={() => handleShareEvent(event)}>
-        <ShareIcon />
-       </IconButton>
-      </Box>
+  <Box className="event-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+  {/* Title on the left */}
+  <Typography className="event-title" variant="h5">
+    {event.title}
+  </Typography>
+
+  {/* Buttons on the right */}
+  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <IconButton className="event-share-btn" onClick={() => handleShareEvent(event)}>
+      <ShareIcon />
+    </IconButton>
+    <IconButton className="like-button" onClick={() => handleLike(event.eventId)}>
+      {event.liked ? (
+        <FavoriteIcon style={{ color: 'red' }} /> // Liked state (red heart)
+      ) : (
+        <FavoriteBorderIcon /> // Not liked state (outline heart)
+      )}
+    </IconButton>
+    <Typography variant="body2">{event.likes}</Typography>
+  </Box>
+  </Box>
       <Typography variant="body1"><strong>Organizer:</strong>{event.organizer}</Typography>
       <Typography variant="body1"><strong>Date:</strong> {event.repeat ?`Every ${event.weekday} (${event.startdate} ~ ${event.enddate})` 
               : event.startdate===event.enddate?

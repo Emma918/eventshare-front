@@ -193,13 +193,18 @@ body {
 }
 
 .nav-button.MuiButton-root {
+  margin: 0 10px;
   text-transform: none;
   font-size: 16px; 
   margin-right: 15px;
   border-radius: 12px;
   transition: background-color 0.3s ease;
 }
-
+@media (max-width: 600px) {
+  .nav-button {
+    width: 50%;  
+  }
+}
 .nav-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }

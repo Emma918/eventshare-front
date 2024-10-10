@@ -9,11 +9,11 @@ function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false); 
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    window.fbAsyncInit = function() {
+    window.fbAsyncInit = function () {
       window.FB.init({
         appId: 'YOUR_FACEBOOK_APP_ID',
         cookie: true,
@@ -49,12 +49,12 @@ function RegisterPage() {
     } catch (error) {
       if (error.response && error.response.data) {
         setError(`${error.response.data.message}`);  // Error message sent from backend
-      } else{
-      setError('Registration failed. Please try again.');
-    }
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
-{/*
+  {/*
   const handleGoogleSuccess = (response) => {
     console.log('Google success', response);
   };
@@ -70,7 +70,7 @@ function RegisterPage() {
   };
   */}
   return (
-    <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2,mt : 4  }}>
+    <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2, mt: 4 }}>
       <Box
         sx={{
           marginTop: 8,
@@ -115,14 +115,14 @@ function RegisterPage() {
             onFocus={() => setShowPasswordRequirements(true)} // Show password requirements on focus
             onBlur={() => setShowPasswordRequirements(false)} // Hide password requirements on blur
           />
-           {/* Password Requirements */}
-           {showPasswordRequirements && (
-          <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
-            <Typography variant="body2" sx={{ color: 'gray' }}>
-              Password must be at least 8 characters long and contain:One uppercase letter,
-              One lowercase letter, One number and One special character (e.g., @$!%*?&#)
-            </Typography>
-          </Box>)}
+          {/* Password Requirements */}
+          {showPasswordRequirements && (
+            <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
+              <Typography variant="body2" sx={{ color: 'gray' }}>
+                Password must be at least 8 characters long and contain:One uppercase letter,
+                One lowercase letter, One number and One special character (e.g., @$!%*?&#)
+              </Typography>
+            </Box>)}
           <TextField
             margin="normal"
             required
@@ -130,10 +130,10 @@ function RegisterPage() {
             label="Confirm Password"
             type="password"
             id="confirmPassword"
-             autoComplete="confirm-password"
+            autoComplete="confirm-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+          />
           {error && <Typography color="error">{error}</Typography>}
           <Button className="button"
             fullWidth
@@ -144,7 +144,7 @@ function RegisterPage() {
             Sign Up
           </Button>
         </Box>
-{/*
+        {/*
         <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}

@@ -3,10 +3,11 @@ import '../App.css';
 import TopNavBar from '../components/TopNavBar';
 import { Box, Button, Card, CardContent, CardActions, Typography, Grid, IconButton } from '@mui/material';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom'; 
 import ShareIcon from '@mui/icons-material/Share';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+
 function HomePage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
@@ -22,6 +23,8 @@ function HomePage() {
   const open = Boolean(anchorEl);
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 9;
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -179,26 +182,29 @@ function HomePage() {
         ) : (
           currentEvents.map((item) => (
             <Grid item xs={12} sm={6} md={4} key={item.eventId}>
-              <Card className="event-card">
+              <Card
+                className="event-card"
+                onClick={() => navigate(`/events/${item.eventId}`)}
+              >
                 <CardContent>
                   {item.images && item.images.length > 0 && (
                     <Box className="event-image-container">
                       <div style={{ width: '260px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <img
-                        src={`${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
-                        alt={`Event Image ${getCurrentImageIndex(item.eventId) + 1}`}
-                        className="event-image"
-                      />
+                        <img
+                          src={`${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
+                          alt={`Event Image ${getCurrentImageIndex(item.eventId) + 1}`}
+                          className="event-image"
+                        />
                       </div>
                       <Button
-                        onClick={() => handlePrevImage(item.eventId, item.images)}
+                        onClick={(e) => { e.stopPropagation(); handlePrevImage(item.eventId, item.images); }} 
                         disabled={item.images.length <= 1}
                         className="arrow-button left-arrow"
                       >
                         &lt;
                       </Button>
                       <Button
-                        onClick={() => handleNextImage(item.eventId, item.images)}
+                        onClick={(e) => { e.stopPropagation(); handleNextImage(item.eventId, item.images); }} 
                         disabled={item.images.length <= 1}
                         className="arrow-button right-arrow"
                       >
@@ -217,20 +223,24 @@ function HomePage() {
                     <strong>Time:</strong> {item.startTime} ~ {item.endTime}
                   </Typography>
                   <Typography variant="body2" className="event-info">
-                    <strong>Location:</strong>
-                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>
+                    <strong>Location:</strong>{' '}
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ textDecoration: 'underline' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {item.location}
                     </a>
                   </Typography>
                 </CardContent>
                 <CardActions className="card-actions">
-                  <Button variant="contained" component={Link} to={`/events/${item.eventId}`} className="button">
-                    View Details
-                  </Button>
-                  <IconButton className="button" onClick={() => handleShareEvent(item)}>
+                  <IconButton className="button" onClick={(e) => { e.stopPropagation(); handleShareEvent(item); }}>
                     <ShareIcon />
                   </IconButton>
-                  <IconButton className="like-button" onClick={() => handleLike(item.eventId)}>
+                  <Typography variant="body2">Share</Typography>
+                  <IconButton className="like-button" onClick={(e) => { e.stopPropagation(); handleLike(item.eventId); }}>
                     {item.liked ? (
                       <FavoriteIcon style={{ color: 'red' }} /> // Liked state (red heart)
                      ) : (

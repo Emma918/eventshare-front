@@ -1,5 +1,5 @@
-import React, { useState, useEffect,useRef  } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle,FormControl,InputLabel, Button, MenuItem, TextField, Select, Grid, Box } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Button, MenuItem, TextField, Select, Grid, Box } from '@mui/material';
 import axios from 'axios';
 
 const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshReservedEvents }) => {
@@ -33,7 +33,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
           console.error('Error fetching dates:', error);
         });
     }
-  }, [apiBaseUrl,event]);
+  }, [apiBaseUrl, event]);
   const isInitialized = useRef(false);
   useEffect(() => {
     if (normalUserDetail && !isInitialized.current) {
@@ -47,7 +47,7 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
         firstLanguage: normalUserDetail.firstLanguage || ''
       }));
       isInitialized.current = true;
-    } 
+    }
   }, [normalUserDetail]);
 
   const handleChange = (e) => {
@@ -78,128 +78,129 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
   };
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-    <DialogTitle>Reserve Event</DialogTitle>
+      <DialogTitle>Reserve Event</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              {event && !event.repeat && event.startdate===event.enddate? (
-                <TextField label="Date"name="date"value={event.startdate}disabled fullWidth variant="outlined"
-                InputProps={{
-                  style: { height: '56px' }}}/>
+              {event && !event.repeat && event.startdate === event.enddate ? (
+                <TextField label="Date" name="date" value={event.startdate} disabled fullWidth variant="outlined"
+                  InputProps={{
+                    style: { height: '56px' }
+                  }} />
               ) : (
-                <FormControl fullWidth required variant="outlined"> 
-                <InputLabel id="date">Date</InputLabel>
-                <Select
-                  label="Date"
-                  name="date"
-                  value={selectedDate}
-                  onChange={handleDateChange}  // Handle date change
-                  fullWidth
-                  required
-                  variant="outlined"
-                >
-                  {availableDates.map((date, index) => (
-                    <MenuItem key={index} value={date}>
-                      {date}
-                    </MenuItem>
-                  ))}
-                </Select>
+                <FormControl fullWidth required variant="outlined">
+                  <InputLabel id="date">Date</InputLabel>
+                  <Select
+                    label="Date"
+                    name="date"
+                    value={selectedDate}
+                    onChange={handleDateChange}  // Handle date change
+                    fullWidth
+                    required
+                    variant="outlined"
+                  >
+                    {availableDates.map((date, index) => (
+                      <MenuItem key={index} value={date}>
+                        {date}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </FormControl>
               )}
             </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Name"
-              name="name"
-              value={reservation.name}
-              onChange={handleChange}
-              fullWidth
-              required
-              variant="outlined"
-              InputProps={{
-                style: { height: '56px' }
-              }}
-            />
+            <Grid item xs={12}>
+              <TextField
+                label="Name"
+                name="name"
+                value={reservation.name}
+                onChange={handleChange}
+                fullWidth
+                required
+                variant="outlined"
+                InputProps={{
+                  style: { height: '56px' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Gender"
+                name="gender"
+                value={reservation.gender}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  style: { height: '56px' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Phone"
+                name="phone"
+                value={reservation.phone}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  style: { height: '56px' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Email"
+                name="email"
+                value={reservation.email}
+                onChange={handleChange}
+                fullWidth
+                required
+                variant="outlined"
+                InputProps={{
+                  style: { height: '56px' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Nationality"
+                name="nationality"
+                value={reservation.nationality}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  style: { height: '56px' }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="First Language"
+                name="firstLanguage"
+                value={reservation.firstLanguage}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  style: { height: '56px' }
+                }}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Gender"
-              name="gender"
-              value={reservation.gender}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { height: '56px' }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Phone"
-              name="phone"
-              value={reservation.phone}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { height: '56px' }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Email"
-              name="email"
-              value={reservation.email}
-              onChange={handleChange}
-              fullWidth
-              required
-              variant="outlined"
-              InputProps={{
-                style: { height: '56px' }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Nationality"
-              name="nationality"
-              value={reservation.nationality}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { height: '56px' }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="First Language"
-              name="firstLanguage"
-              value={reservation.firstLanguage}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                style: { height: '56px' }
-              }}
-            />
-          </Grid>
-        </Grid>
-      </Box>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose} variant="outlined">
-        Cancel
-      </Button>
-      <Button className='button' onClick={handleSubmit} variant="contained" color="primary">
-        Reserve
-      </Button>
-    </DialogActions>
-  </Dialog>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} variant="outlined">
+          Cancel
+        </Button>
+        <Button className='button' onClick={handleSubmit} variant="contained" color="primary">
+          Reserve
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

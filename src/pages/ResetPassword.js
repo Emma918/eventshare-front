@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import {useLocation, useNavigate } from 'react-router-dom'; // Adjust if using a different router
+import { useLocation, useNavigate } from 'react-router-dom'; // Adjust if using a different router
 import axios from 'axios';
-import {Box, Button, Container, TextField,  Typography } from '@mui/material';
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -9,7 +9,7 @@ const ResetPassword = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false); 
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const location = useLocation();
 
   // Extract the reset token from the URL
@@ -57,14 +57,14 @@ const ResetPassword = () => {
         onFocus={() => setShowPasswordRequirements(true)} // Show password requirements on focus
         onBlur={() => setShowPasswordRequirements(false)} // Hide password requirements on blur
       />
-       {/* Password Requirements */}
-       {showPasswordRequirements && (
-      <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
-        <Typography variant="body2" sx={{ color: 'gray' }}>
-          Password must be at least 8 characters long and contain:One uppercase letter,
-          One lowercase letter, One number and One special character (e.g., @$!%*?&#)
-        </Typography>
-      </Box>)}
+      {/* Password Requirements */}
+      {showPasswordRequirements && (
+        <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
+          <Typography variant="body2" sx={{ color: 'gray' }}>
+            Password must be at least 8 characters long and contain:One uppercase letter,
+            One lowercase letter, One number and One special character (e.g., @$!%*?&#)
+          </Typography>
+        </Box>)}
       <TextField
         label="Confirm Password"
         type="password"

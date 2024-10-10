@@ -166,16 +166,16 @@ body {
 /* Button styles */
 .button {
   background: linear-gradient(135deg, #6E45E2 0%, #88D3CE 100%);
-  color: #fff;
-  padding: 8px 24px;
-  text-transform: none;
-  margin-right: 15px;
-  border-radius: 12px;
+  color: #fff; /* 强制文字颜色为白色 */
+  padding: 8px 24px; /* 强制生效padding */
+  text-transform: none !important; /* 强制不转换文本 */
+  margin-right: 15px; /* 强制生效margin */
+  border-radius: 12px; /* 强制生效圆角 */
   transition: background 0.3s ease-in-out;
 }
 
 .button:hover {
-  background: linear-gradient(135deg, #88D3CE 0%, #6E45E2 100%);
+  background: linear-gradient(135deg, #88D3CE 0%, #6E45E2 100%); /* 强制生效背景渐变 */
 }
 /* No events message */
 .no-events {
@@ -359,4 +359,116 @@ body {
   text-align: left;
   margin-left: 0;
   margin-right: auto;
+}
+/* 隐藏时间轴部分 */
+.rbc-time-content {
+  display: none !important; /* 强制隐藏时间内容 */
+}
+/* 隐藏时间轴的时间段 */
+.rbc-time-gutter {
+  display: none !important;
+}
+/* 隐藏 week 和 day 视图中的时间头 */
+.rbc-time-header-gutter {
+  display: none !important; /* 强制隐藏顶部的时间显示部分 */
+}
+
+/* 将每一天的内容设置为全宽 */
+.rbc-time-header-content {
+  width: 100%;
+}
+
+/* 调整每个事件的样式，让它们更像列表 */
+.rbc-event {
+  display: block;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+.custom-event {
+  transition: transform 0.3s ease;  /* 添加动画过渡效果 */
+}
+
+.custom-event:hover {
+  transform: scale(1.1);  /* 鼠标悬停时放大事件 */
+  z-index: 2; /* 提高 z-index，让事件浮到前面 */
+}
+.custom-event-card {
+  padding: 5px;
+  background-color: #3174ad;
+  color: white;
+  border-radius: 4px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* 平滑的放大动画 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* 默认阴影 */
+}
+
+.custom-event-card:hover {
+  transform: scale(1.01);  /* 鼠标悬停时，放大1.1倍 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 放大时增加阴影 */
+  z-index: 1000; /* 提升层级，确保事件浮在其他元素上方 */
+}
+.rbc-month-view {
+  position: relative;
+}
+
+.rbc-day-bg {
+  transition: background-color 0.1s ease; /* 平滑的背景色过渡 */
+}
+
+.rbc-day-bg:hover {
+  background-color: #e0f7fa !important; /* Force hover color change */
+}
+.rbc-today {
+  background-color: #dfe68b!important; 
+}
+/* 定义 agenda 视图中日期列的样式 */
+.rbc-agenda-date-cell {
+  position: relative;
+  border-right: 1px solid #ccc; /* 添加右侧边框 */
+  height: 100%; /* 确保边框高度覆盖整个列 */
+}
+
+/* 确保 agenda 列的高度适应多个 event */
+.rbc-agenda-event-cell {
+  height: auto;
+  padding: 5px 10px;
+}
+
+/* 确保日期分割线覆盖整个all-day部分并延伸到底端 */
+.rbc-allday-cell {
+  height: 100% !important; /* 确保竖线覆盖整个all-day部分 */
+  min-height: 100vh !important; /* 确保竖线的最小高度为100vh */
+}
+/* 覆盖日历组件的高度，确保布局稳定 */
+.rbc-time-view {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* 控制all-day部分的高度，使其全屏展示 */
+.rbc-allday-row {
+  height: auto !important;
+  min-height: 100% !important;
+}
+@media (max-width: 600px) {
+  .rbc-calendar {
+    width: 100% !important;
+    overflow-x: auto;  /* 允许水平滚动以防止溢出 */
+  }
+
+  .rbc-time-content {
+    flex-direction: column; /* 将日程表竖直排列 */
+    height: auto !important;  /* 让高度自适应 */
+  }
+
+  .rbc-time-header, .rbc-time-header-content {
+    display: block; /* 防止标题部分被压缩 */
+  }
+  .rbc-event {
+    font-size: 12px;  /* 减小字体 */
+    padding: 5px;  /* 减少内边距 */
+  }
+  .calendar-container {
+    height: 100%;
+    overflow: auto; /* 允许滚动 */
+  }
 }

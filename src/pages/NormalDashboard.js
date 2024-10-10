@@ -1,17 +1,120 @@
-import React, { useState, useEffect ,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import '../App.css'; 
+import '../App.css';
 import TopNavBar from '../components/TopNavBar';
-import {TextField, Button, Box,Typography, Tabs, Tab, Card, CardContent, CardActions } from '@mui/material';
+import { IconButton, TextField, Button, Box, Typography, Card, CardContent, CardActions, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Grid from '@mui/material/Grid';
 import ReservationDialog from './ReservationDialog';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import moment from 'moment-timezone'; // Import moment-timezone
+import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
+import MenuIcon from '@mui/icons-material/Menu'; // 引入 Menu 图标
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import 'react-big-calendar/lib/css/react-big-calendar.css'; // 引入样式
+import ShareIcon from '@mui/icons-material/Share';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+// 设置本地时间
+const localizer = momentLocalizer(moment);
+// 生成从 startdate 到 enddate 的每一天
+const getDateRange = (start, end) => {
+  const dateArray = [];
+  let currentDate = new Date(start); // 仍然保持为 Date 对象
+  const today = new Date(); // 获取当前日期
+  const endDate = new Date(end); // 保持为 Date 对象
+
+  // 清除时间部分，仅保留日期进行比较
+  currentDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  endDate.setHours(0, 0, 0, 0);
+
+  // 如果 startdate 小于当前日期，则从当前日期开始
+  if (currentDate < today) {
+    currentDate = today;
+  }
+  // 生成从 currentDate 到 endDate 的所有日期
+  while (currentDate <= endDate) {
+    dateArray.push(new Date(currentDate)); // 将每一天添加到数组中
+    currentDate.setDate(currentDate.getDate() + 1); // 前进到下一天
+  }
+  return dateArray;
+};
+
+// 获取从 start 到 end 之间的所有符合 weekday 的日期
+const getDateRangeByWeekday = (start, end, weekday) => {
+  const dateArray = [];
+  let currentDate = new Date(start); // 保持为 Date 对象
+  const today = new Date(); // 获取当前日期
+  const endDate = new Date(end); // 保持为 Date 对象
+
+  // 清除时间部分，仅保留日期进行比较
+  currentDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  endDate.setHours(0, 0, 0, 0);
+
+  // 如果 startdate 小于当前日期，则从当前日期开始
+  if (currentDate < today) {
+    currentDate = today;
+  }
+
+  // 转换 weekday 为对应的数字（0=Sunday, 1=Monday, ..., 6=Saturday）
+  const targetWeekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(weekday);
+
+  // 循环遍历日期范围，找到所有符合 weekday 的日期
+  while (currentDate <= endDate) {
+    if (currentDate.getDay() === targetWeekday) {
+      dateArray.push(new Date(currentDate)); // 只添加符合 weekday 的日期
+    }
+    currentDate.setDate(currentDate.getDate() + 1); // 前进到下一天
+  }
+
+  return dateArray;
+};
+// 自定义事件列表的渲染方式
+function CustomEvent({ event }) {
+  // 自定义事件列表的样式和内容
+  return (
+    <div className="custom-event-card" style={{ display: 'flex', alignItems: 'center' }}>
+      {/* 图片部分 */}
+      {event.images && event.images.length > 0 && (
+        <div style={{ marginRight: '30px' }}> {/* 图片和内容之间的间距 */}
+          <img
+            src={`${event.images[0].imagePath}`}
+            alt="Event"
+            style={{ width: '100px', height: '100px', objectFit: 'contain' }} // 设置图片尺寸
+          />
+        </div>
+      )}
+
+      {/* 内容部分：标题、时间、地点 */}
+      <div>
+        <strong>{event.title}</strong>
+        <p>{event.time}</p>
+        <p>{event.location}</p>
+      </div>
+    </div>
+  );
+}
+function CustomEventForWeek({ event }) {
+  // 自定义事件列表的样式和内容
+  return (
+    <div className="custom-event-card" style={{ display: 'flex', alignItems: 'center' }}>
+      {/* 内容部分：标题、时间、地点 */}
+      <div>
+        <strong>{event.title}</strong>
+        <p>{event.time}</p>
+        <p>{event.location}</p>
+      </div>
+    </div>
+  );
+}
 function NormalDashboard() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
   const [events, setEvents] = useState([]);
   const [orignevents, setOrignEvents] = useState([]);
   const [currentEvents, setCurrentEvents] = useState([]);
@@ -19,12 +122,12 @@ function NormalDashboard() {
   const [location, setLocation] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [reservedEvents, setReservedEvents] = useState([]);
-  const [tabValue, setTabValue] = useState(0);  // 控制选项卡
   const [anchorEl, setAnchorEl] = useState(null);  // 控制菜单
   const open = Boolean(anchorEl);
   const [userName, setUserName] = useState('');  // 初始化 userName 为空字符串
   const userEmail = localStorage.getItem('userEmail');  //用户的邮箱
-  const userRole= localStorage.getItem('userRole');  //用户角色
+  const userRole = localStorage.getItem('userRole');  //用户角色
+  const userId = localStorage.getItem('userId');
   const [isLoggedIn, setIsLoggedIn] = useState(!!userEmail);  // 检查是否已登录
   const [selectedEvent, setSelectedEvent] = useState(null); // 当前选中的课程ID
   const [normalUserDetail, setNormalUserDetail] = useState(null); // 存储用户详细信息
@@ -32,20 +135,82 @@ function NormalDashboard() {
   const [eventCategorys, setCategorys] = useState([]);//  get event categorys
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDate, setCurrentDate] = useState('');
+  const [hoveredDate, setHoveredDate] = useState(null); // 追踪鼠标悬停的日期
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const inputRef = useRef(null);  // 创建 ref 引用
-  const eventsPerPage = 5; 
+  const eventsPerPage = 5;
+  const navigate = useNavigate();
+
+  // 获取传回的 viewMode，仅当从 EventDetail 返回时处理
+  const [viewMode, setViewMode] = useState(useLocation().state?.viewMode || 'list');// 用于页面跳转
+  // 新增状态来控制显示模式：列表或日历
+  const [view, setView] = useState(Views.WEEK); // 默认为 week 视图
+  const handleViewModeChange = (event, newViewMode) => {
+    if (newViewMode !== null) {
+      setViewMode(newViewMode);
+    }
+  };
+
+  // 将活动数据转换为日历事件格式
+  const eventListForCalendar = filteredEvents.flatMap(event => {
+
+    let dates = event.repeat
+      ? getDateRangeByWeekday(event.startdate, event.enddate, event.weekday) // 处理重复的事件
+      : getDateRange(event.startdate, event.enddate); // 非重复事件
+    // 再次过滤，只保留与用户选择的日期匹配的日期
+    if (date) {
+      const inputDate = new Date(date);
+      inputDate.setHours(0, 0, 0, 0); // 只保留日期部分
+      const validDates = dates.filter(d => {
+        const eventDate = new Date(d);
+        eventDate.setHours(0, 0, 0, 0); // 只保留日期部分
+        return eventDate.getTime() === inputDate.getTime();
+      });
+      dates = validDates;
+    }
+    return dates.map(date => {
+      // 创建一个新的 Date 对象来确保时间和日期都被正确设置
+      const localDate = new Date(date); // 确保 date 是你要的日期
+      const [hours, minutes] = event.startTime.split(':'); // 分割小时和分钟
+
+      // 设置时间
+      localDate.setHours(parseInt(hours), parseInt(minutes), 0, 0); // 设置正确的小时和分钟
+
+      const startTime = new Date(localDate); // 创建最终的 startTime
+      const endTime = new Date(localDate); // 同样的方法用于 endTime
+
+      // 使用同样的方式设置 endTime
+      const [endHours, endMinutes] = event.endTime.split(':');
+      endTime.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
+
+      return {
+        title: event.title,
+        start: startTime,
+        end: endTime,
+        location: event.location,
+        eventId: event.eventId,
+        allDay: view === 'week' || view === 'day', // Treat as all-day event in week/day view
+        images: event.images,
+        time: `${event.startTime} ~ ${event.endTime}`,
+      };
+    });
+  });
+  // 当点击日历中的某个事件时，跳转到 EventDetail 页面
+  const handleSelectEvent = (event) => {
+    navigate(`/events/${event.eventId}`, { state: { viewMode: viewMode, from: 'NormalDashboard' } }); // 跳转到 eventId 对应的 EventDetail 页面
+  };
   useEffect(() => {
     const checkIfEventsFull = async (events) => {
       const updatedEvents = await Promise.all(
         events.map(async (event) => {
-         let isFull =false;
-          if(!event.repeat && event.startdate===event.enddate){
-          // 获取该event的预约人数
-          const { data: reservationCount } = await axios.get(`${apiBaseUrl}/api/${event.eventId}/reservnum?date=${event.startdate}`);
-          // 判断是否预约满了
-          isFull = reservationCount >= event.capacity;
-          console.log(isFull);
-        } 
+          let isFull = false;
+          if (!event.repeat && event.startdate === event.enddate) {
+            // 获取该event的预约人数
+            const { data: reservationCount } = await axios.get(`${apiBaseUrl}/api/${event.eventId}/reservnum?date=${event.startdate}`);
+            // 判断是否预约满了
+            isFull = reservationCount >= event.capacity;
+            console.log(isFull);
+          }
           // 返回一个新的事件对象，添加了是否已满的标记
           return {
             ...event,
@@ -53,177 +218,170 @@ function NormalDashboard() {
           };
         })
       );
-    
+
       // 更新 events 列表，包含是否已满的信息
       return updatedEvents; // Return the updated events
     };
     const fetchEvents = async () => {
-      const response = await axios.get(`${apiBaseUrl}/api/events`);
-      if(response.length !==0){
+      let response;
+      if(isLoggedIn){
+        response = await axios.get(`${apiBaseUrl}/api/events`, {
+          params: {
+            userId: userId
+          }
+        });
+    }
+      else{
+        response = await axios.get(`${apiBaseUrl}/api/events`);
+      }
+      if (response.length !== 0) {
         const eventsData = response.data;
         const updatedEvents = await checkIfEventsFull(eventsData);
         setEvents(updatedEvents);
         setOrignEvents(updatedEvents);
-        setFilteredEvents(updatedEvents); 
-    }
+        setFilteredEvents(updatedEvents);
+      }
     };
     fetchEvents();
-     //get category
-     const getCategory = async () => {
+    //get category
+    const getCategory = async () => {
       const response = await axios.get(`${apiBaseUrl}/api/columns/Event category`);
-      if(response.length !==0){
-        setCategorys(response.data); 
-    }
+      if (response.length !== 0) {
+        setCategorys(response.data);
+      }
     };
     getCategory();
     const date = new Date();  // 获取当前日期
     const formattedDate = date.toLocaleDateString();  // 格式化日期
     setCurrentDate(formattedDate);  // 设置格式化的日期
   }, [apiBaseUrl]);
-  
-  
-// 获取用户详细信息
-   useEffect(() => {
-     const fetchUserDetails = async () => {
-    try {
-      const response = await axios.get(`${apiBaseUrl}/api/normal-user-details/${userEmail}`);
-      if(response.length !==0){
-      setNormalUserDetail(response.data);  // 将用户详细信息存储在状态中
-      setUserName(response.data.name);  // 获取用户的 name 并赋值给 userName
+
+
+  // 获取用户详细信息
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/normal-user-details/${userEmail}`);
+        if (response.length !== 0) {
+          setNormalUserDetail(response.data);  // 将用户详细信息存储在状态中
+          setUserName(response.data.name);  // 获取用户的 name 并赋值给 userName
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
       }
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-    }
     };
 
-  if (userEmail) {
-    fetchUserDetails();  // 如果用户邮箱存在，则获取详细信息
-  }
-  }, [userEmail,normalUserDetail,apiBaseUrl]);
-useEffect(() => {
-  const fetchReservedEvents = async () => {
+    if (userEmail) {
+      fetchUserDetails();  // 如果用户邮箱存在，则获取详细信息
+    }
+  }, [userEmail, normalUserDetail, apiBaseUrl]);
+  // Fetch reserved events
+  const refreshReservedEvents = async () => {
     try {
       const response = await axios.get(`${apiBaseUrl}/api/user/reserved-events/${userEmail}`);
-      if(response.length !==0){
-      setReservedEvents(response.data);  // 保存预约课程信息
-    }
+      if (response.length !== 0) {
+        setReservedEvents(response.data);
+      }
     } catch (error) {
       console.error('Error fetching reserved events:', error);
     }
   };
 
-  if (userEmail) {
-    fetchReservedEvents();
-  }
-}, [userEmail,apiBaseUrl]);
- // Fetch reserved events
-const refreshReservedEvents = async () => {
-  try {
-    const response = await axios.get(`${apiBaseUrl}/api/user/reserved-events/${userEmail}`);
-    if(response.length !==0){
-    setReservedEvents(response.data);
-  }
-  } catch (error) {
-    console.error('Error fetching reserved events:', error);
-  }
-};
-
-const filterEvents = () => {
+  const filterEvents = () => {
     let uniqueEvents = events;
-    let filteredByDate  = events;
+    let filteredByDate = events;
     let filteredByWeekday = events;
     if (date) {
+      const inputDate = new Date(date);
       filteredByDate = filteredByDate.filter(event => {
         const eventStartDate = new Date(event.startdate);
         const eventEndDate = new Date(event.enddate);
-        const inputDate = new Date(date);
-      
+        inputDate.setHours(0, 0, 0, 0);
+        eventStartDate.setHours(0, 0, 0, 0);
+        eventEndDate.setHours(0, 0, 0, 0);
         return inputDate >= eventStartDate && inputDate <= eventEndDate && !event.repeat;
-      });      
-      const inputdate = new Date(date);  // 将日期字符串转换为 Date 对象
+      });
+      // 将日期字符串转换为 Date 对象
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const dayIndex = inputdate.getDay(); 
-      filteredByWeekday = filteredByWeekday.filter(event => event.weekday === daysOfWeek[dayIndex]);
+      const dayIndex = inputDate.getDay();
+      filteredByWeekday = filteredByWeekday.filter(event => {
+        const eventStartDate = new Date(event.startdate);
+        const eventEndDate = new Date(event.enddate);
+        inputDate.setHours(0, 0, 0, 0);
+        eventStartDate.setHours(0, 0, 0, 0);
+        eventEndDate.setHours(0, 0, 0, 0);
+        return inputDate >= eventStartDate && inputDate <= eventEndDate && event.weekday === daysOfWeek[dayIndex]
+      });
       const combinedFilteredEvents = [
-      ...filteredByDate,
-      ...filteredByWeekday
-    ];
-    uniqueEvents = Array.from(new Set(combinedFilteredEvents.map(event => event.eventId)))
-  .map(id => combinedFilteredEvents.find(event => event.eventId === id));
+        ...filteredByDate,
+        ...filteredByWeekday
+      ];
+      uniqueEvents = Array.from(new Set(combinedFilteredEvents.map(event => event.eventId)))
+        .map(id => combinedFilteredEvents.find(event => event.eventId === id));
     }
     if (location) {
       uniqueEvents = uniqueEvents.filter(event => event.location.toLowerCase().includes(location.toLowerCase()));
     }
     setFilteredEvents(uniqueEvents);
   };
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);  // 切换选项卡
-  };
+
   const filterEventsByCategory = (e) => {
     setDate(null);
     setLocation(null);
     let uniqueEvents = orignevents;
     const categoryValue = Number(e.currentTarget.value);
-    uniqueEvents = uniqueEvents.filter(event => event.category === categoryValue);
+    if (categoryValue !== 0) {
+      uniqueEvents = uniqueEvents.filter(event => event.category === categoryValue);
+    }
     setEvents(uniqueEvents);
     setFilteredEvents(uniqueEvents);
   };
-// 点击课程卡片进行预约
-const handleReserveClick = (event) => {
-  if(isLoggedIn){
-    setSelectedEvent(event); // 设置选中的课程
-    setIsReservationOpen(true); // 打开预约窗口
-    console.log('Selected event:', event)
-  }else{
-  alert("Please login first!");
-}
-};
- // 取消预约
- const handleCancelReservation = async (eventId, date) => {
-  try {
-    await axios.delete(`${apiBaseUrl}/api/events/reserve/${eventId}`, {
-      data: {
-        email: userEmail,
-      }
-    });
-    alert('Reservation cancelled successfully!');
-    
-    // 重新获取预约的课程信息
-    setReservedEvents(reservedEvents.filter(event => event.event.eventId !== eventId));
-  } catch (error) {
-    console.error('Error cancelling reservation:', error);
-    alert('Failed to cancel reservation. Please try again.');
-  }
-};
-// Pagination handlers
-const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  const handleCategoryClick = (e, columnSeq) => {
+    setSelectedCategory(columnSeq);
+    filterEventsByCategory(e); // 执行过滤逻辑
+  };
+  // 点击课程卡片进行预约
+  const handleReserveClick = (event) => {
+    if (isLoggedIn) {
+      setSelectedEvent(event); // 设置选中的课程
+      setIsReservationOpen(true); // 打开预约窗口
+      console.log('Selected event:', event)
+    } else {
+      alert("Please login first!");
+    }
+  };
+  // Pagination handlers
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-const handlePageChange = (pageNumber) => {
-  setCurrentPage(pageNumber);
-};
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
-const handleNextPage = () => {
-  if (currentPage < totalPages) {
-    setCurrentPage(currentPage + 1);
-  }
-};
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
-const handlePrevPage = () => {
-  if (currentPage > 1) {
-    setCurrentPage(currentPage - 1);
-  }
-};
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
-useEffect(() => {
-  const indexOfLastEvent = currentPage * eventsPerPage;
-  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  setCurrentEvents(filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent));
-}, [filteredEvents, currentPage]);
+  useEffect(() => {
+    const indexOfLastEvent = currentPage * eventsPerPage;
+    const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+    setCurrentEvents(filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent));
+  }, [filteredEvents, currentPage]);
 
 
   const handleKeyDown = (event) => {
     if (event.key === 'Delete' || event.key === 'Backspace') {
       setDate(null);  // 清空日期
+    }
+    if (event.key === 'Enter') {
+      filterEvents(); // 检测到回车键时触发 filterEvents
     }
   };
   const handleFocus = () => {
@@ -231,10 +389,79 @@ useEffect(() => {
       inputRef.current.select();  // 全选日期
     }
   };
-return (
+  const handleMouseEnter = (date) => {
+    setHoveredDate(date);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredDate(null);
+  };
+
+  // 自定义日期样式
+  const dayPropGetter = (date) => {
+    const isHovered = hoveredDate && moment(date).isSame(hoveredDate, 'day'); // 检查是否悬停在当前日期
+    return {
+      style: {
+        backgroundColor: isHovered ? '#e0f7fa' : 'inherit', // 悬停时变色
+        transition: 'background-color 0.1s ease', // 添加平滑的过渡效果
+      },
+      onMouseEnter: () => handleMouseEnter(date), // 处理鼠标悬停事件
+      onMouseLeave: handleMouseLeave, // 处理鼠标离开事件
+    };
+  };
+  const handleShareEvent = (item) => {
+    if (isLoggedIn) {
+      if (navigator.share) {
+        navigator
+          .share({
+            title: item.title,
+            text: `Check out this event: ${item.title}`,
+            url: `${apiAppUrl}/events/${item.eventId}`,
+          })
+          .then(() => console.log('Event shared successfully'))
+          .catch((error) => console.error('Error sharing the event:', error));
+      } else {
+        const fallbackUrl = `${apiAppUrl}/events/${item.eventId}`;
+        navigator.clipboard.writeText(fallbackUrl)
+          .then(() => {
+            alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');
+          })
+          .catch((error) => {
+            console.error('Error copying URL to clipboard:', error);
+            alert('Web Share API is not supported in this browser. Unable to share the event.');
+          });
+      }
+    }
+    else {
+      alert("Please login first!");
+    }
+  };
+  const handleLike = async (eventId) => {
+    if (isLoggedIn) {
+      try {
+        // Send a request to the backend to update the like count for the event
+        const response = await axios.post(`${apiBaseUrl}/api/events/${eventId}/like`, { userId });
+
+        // Update the local event state with the new like count
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.eventId === eventId
+              ? { ...event, likes: response.data.likes, liked: response.data.liked } // update likes and liked state
+              : event
+          )
+        );
+        setCurrentEvents(events);
+      } catch (error) {
+        console.error('Error updating like:', error);
+      }
+    } else {
+      alert("Please login first!");
+    }
+  };
+  return (
     <div className="container">
-    {/* 顶端任务栏 */}
-    <TopNavBar
+      {/* 顶端任务栏 */}
+      <TopNavBar
         isLoggedIn={isLoggedIn}
         userName={userName}
         userRole={userRole}
@@ -245,42 +472,80 @@ return (
         setAnchorEl={setAnchorEl}
       />
       <Box sx={{ display: 'flex', gap: 0.5, mt: 2 }}>
-      {eventCategorys && eventCategorys.map((categorys, index) => (
-      <Button key={index} value={categorys.columnSeq} color="inherit" className="category-button" onClick={(e) => filterEventsByCategory(e)}>
-      {categorys.columnDetail}
-      </Button>
-      ))} </Box>
-    {/* 日期选择和地点输入 */}
-    <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <DatePicker
-          label="Select Date"
-          value={date}
-          onChange={(newValue) => setDate(newValue)}
-          renderInput={(params) => <TextField {...params}  
-          inputRef={inputRef}  // 绑定 inputRef
-          onKeyDown={handleKeyDown}  // 监听删除键
-          onFocus={handleFocus}             
-        />}
-        />
-      </LocalizationProvider>
-      <TextField
-        label="Search by Location"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-      />
-      <Button variant="contained" className="button" onClick={filterEvents}>Search</Button>
-    </Box>
-  
-    {/* 分页组件 */}
-    <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth">
-        <Tab label="Available Events" />
-        {isLoggedIn && (
-           <Tab label="Reserved Events" />)}
-      </Tabs>
+        {eventCategorys && eventCategorys.map((categorys, index) => (
+          <Button
+            key={index}
+            value={categorys.columnSeq}
+            onClick={(e) => handleCategoryClick(e, categorys.columnSeq)}
+            sx={{
+              backgroundColor: selectedCategory === categorys.columnSeq ? '#6E45E2' : '#1976d2 ', // 选中时紫色 (#800080)，未选中时蓝色 (#1976d2)
+              color: '#fff', // 所有按钮文字颜色都为白色
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: selectedCategory === categorys.columnSeq ? '#6E45E2' : '#1976d2 ', // 悬停时选中按钮变浅紫色，未选中按钮变浅蓝色
+              },
+              borderRadius: '12px',
+              padding: '8px 23px'
+            }}
+          >
+            {categorys.columnDetail}
+          </Button>
+        ))}
+      </Box>
+      {/* 日期选择和地点输入 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
+        {/* Date Picker 和 Location 输入框 */}
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Select Date"
+            value={date}
+            onChange={(newValue) => setDate(newValue)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                inputRef={inputRef} // 绑定 inputRef
+                onKeyDown={handleKeyDown} // 监听删除键
+                onFocus={handleFocus}
+              />
+            )}
+          />
+        </LocalizationProvider>
 
-      {/* 可用课程分页 */}
-      {tabValue === 0 && (
+        <TextField
+          label="Search by Location"
+          value={location}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              filterEvents(); // 检测到回车键时触发 filterEvents
+            }
+          }}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+
+        <Button variant="contained" className="button" onClick={filterEvents} sx={{ height: '50px' }}>
+          Search
+        </Button>
+
+        {/* 添加一个 flex-grow 来使 List 和 Calendar 按钮在最右侧 */}
+        <Box sx={{ flexGrow: 1 }} />
+
+        {/* 切换视图按钮：List 和 Calendar */}
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewModeChange}
+          aria-label="View mode toggle"
+        >
+          <ToggleButton value="list" aria-label="List View">
+            <MenuIcon />
+          </ToggleButton>
+          <ToggleButton value="calendar" aria-label="Calendar View">
+            <CalendarTodayIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+      {/* 列表模式 */}
+      {viewMode === 'list' ? (
         <Box sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             {currentEvents.length === 0 ? (
@@ -288,118 +553,130 @@ return (
             ) : (
               currentEvents.map(event => (
                 <Grid item xs={12} key={event.eventId}>
-                  <Card sx={{ mb: 3,width: '90%' }} className="event-card">
-                  <Link to={`/events/${event.eventId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <CardContent>
-                    <Grid container spacing={2}>
-                      {/* Left side: Event details */}
-                      <Grid item xs={6}>
-                        <Typography variant="h6">{event.title}</Typography>
-                        <Typography variant="body2"> 
-                          {event.organizer}<br />
-                          Date: {event.repeat ?`Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate===event.enddate?event.startdate:`${event.startdate} ~ ${event.enddate}`}  <br />
-                          Time:{event.startTime} ~ {event.endTime} <br />
-                          Location: {event.location} <br />
-                          Capacity: {event.capacity} <br />
-                          Level: {event.levelname} <br />
-                          Free: {event.isFree ? 'Yes' : 'No'} <br />
-                          {event.reserve ? 'Reservation Required' : 'No Reservation Required'} <br />
-                          <Typography variant="body2" component="div" sx={{
-                           whiteSpace: 'nowrap',overflow: 'hidden',textOverflow: 'ellipsis', display: '-webkit-box',
-                           WebkitLineClamp: 1,
-                           WebkitBoxOrient: 'vertical',}}>
-                           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
-                           </Typography><br />
-                        </Typography>
-                      </Grid>
-                      {/* Right side: Event image */}
-                      <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                         {event.images && event.images.length > 0 && (
-                           <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                           <img
-                            src={`${event.images[0].imagePath}`}
-                            alt="Event"
-                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                           />
-                           </div>
-                          )}
-                      </Grid>
-                    </Grid>
-                    </CardContent>
-                    </Link>
-                    <CardActions>
-                    {event.reserve && (event.isFull ? ( <Typography variant="body1" color="error">Fully Reserved</Typography>) : (
-                      <Button className='button' variant="contained" onClick={() => handleReserveClick(event)}>
-                       Reserve
-                      </Button> ))}
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))
-            )}
-          </Grid>
-             {/* Pagination */}
-         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2,gap: 2 }}>
-        <Button onClick={handlePrevPage} disabled={currentPage === 1}>
-          &lt;
-        </Button>
-        {[...Array(totalPages).keys()].map((pageNumber) => (
-          <Button className='button'
-            key={pageNumber + 1}
-            onClick={() => handlePageChange(pageNumber + 1)}
-            variant={currentPage === pageNumber + 1 ? 'contained' : 'outlined'}
-          >
-            {pageNumber + 1}
-          </Button>
-        ))}
-        <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          &gt;
-        </Button>
-         </Box>
-        </Box> 
-      )}
-
-      {/* 已预约课程分页 */}
-      {isLoggedIn && tabValue === 1 && (
-        <Box sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
-            {reservedEvents.length === 0 ? (
-              <Typography>No reserved events found.</Typography>
-            ) : (
-              reservedEvents.map(event => (
-                <Grid item xs={12} key={event.eventId}>
-                  <Card sx={{ mb: 2,width: '90%' }} className="event-card">
+                  <Card sx={{ mb: 3, width: '90%' }} className="event-card">
                     <CardContent>
-                      <Typography variant="h6">{event.event.title}</Typography>
-                      <Typography variant="body2">
-                        Organizer: {event.event.organizer}<br />
-                        Date: {event.reservationDetails.date}  {event.event.startTime}--{event.event.endTime}<br />
-                        Location: {event.event.location}<br />
-                      </Typography>
+                      <Box className="event-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                        {/* Title on the left */}
+                        <Typography className="event-title" variant="h5">
+                          {event.title}
+                        </Typography>
+
+                        {/* Buttons on the right */}
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <IconButton className="event-share-btn" onClick={() => handleShareEvent(event)}>
+                            <ShareIcon />
+                          </IconButton>
+                          <Typography variant="body2">Share</Typography>
+                          <IconButton className="like-button" onClick={() => handleLike(event.eventId)}>
+                            {event.liked ? (
+                              <FavoriteIcon style={{ color: 'red' }} /> // Liked state (red heart)
+                            ) : (
+                              <FavoriteBorderIcon /> // Not liked state (outline heart)
+                            )}
+                          </IconButton>
+                          {event.likes > 0 && (<Typography variant="body2">{event.likes}</Typography>)}
+                        </Box>
+                      </Box>
+                      <Link to={`/events/${event.eventId}`} state={{ from: 'NormalDashboard', viewMode: viewMode }} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Grid container spacing={2}>
+                          {/* Left side: Event details */}
+                          <Grid item xs={6}>
+                            <Typography variant="body2">
+                              {event.organizer}<br />
+                              Date: {event.repeat ? `Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate === event.enddate ? event.startdate : `${event.startdate} ~ ${event.enddate}`}  <br />
+                              Time:{event.startTime} ~ {event.endTime} <br />
+                              Location: {event.location} <br />
+                              Capacity: {event.capacity} <br />
+                              Level: {event.levelname} <br />
+                              Free: {event.isFree ? 'Yes' : 'No'} <br />
+                              {event.reserve ? 'Reservation Required' : 'No Reservation Required'} <br />
+                              <Typography variant="body2" component="div" sx={{
+                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                              }}>
+                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
+                              </Typography><br />
+                            </Typography>
+                          </Grid>
+                          {/* Right side: Event image */}
+                          <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            {event.images && event.images.length > 0 && (
+                              <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <img
+                                  src={`${event.images[0].imagePath}`}
+                                  alt="Event"
+                                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                />
+                              </div>
+                            )}
+                          </Grid>
+                        </Grid>
+                      </Link>
                     </CardContent>
                     <CardActions>
-                    { new Date(event.reservationDetails.date)>=new Date(currentDate) && (<Button variant="outlined" color="secondary" onClick={() => handleCancelReservation(event.event.eventId, event.reservationDetails.date)}>
-                        Cancel
-                      </Button>)
-                      }
+                      {event.reserve && (event.isFull ? (<Typography variant="body1" color="error">Fully Reserved</Typography>) : (
+                        <Button className='button' variant="contained" onClick={() => handleReserveClick(event)}>
+                          Reserve
+                        </Button>))}
                     </CardActions>
                   </Card>
                 </Grid>
               ))
             )}
           </Grid>
+          {/* Pagination */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
+            <Button onClick={handlePrevPage} disabled={currentPage === 1}>
+              &lt;
+            </Button>
+            {[...Array(totalPages).keys()].map((pageNumber) => (
+              <Button className='button'
+                key={pageNumber + 1}
+                onClick={() => handlePageChange(pageNumber + 1)}
+                variant={currentPage === pageNumber + 1 ? 'contained' : 'outlined'}
+              >
+                {pageNumber + 1}
+              </Button>
+            ))}
+            <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
+              &gt;
+            </Button>
+          </Box>
         </Box>
+      ) : (
+        // 日历视图
+        <Calendar
+          localizer={localizer}
+          events={eventListForCalendar}
+          components={{
+            week: {
+              event: CustomEventForWeek, // Week view uses custom event renderer
+            },
+            day: {
+              event: CustomEvent, // Day view uses custom event renderer
+            },
+            agenda: {
+              event: CustomEvent, // agenda view uses custom event renderer
+            },
+          }}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: '100%', minHeight: '100vh', width: '100%', overflowY: 'auto', marginTop: '50px' }}
+          onView={setView}
+          step={60} // 确保以小时为单位划分时间段
+          onSelectEvent={handleSelectEvent}
+          dayPropGetter={dayPropGetter}
+        />
       )}
-    <ReservationDialog
+      <ReservationDialog
         open={isReservationOpen}
         onClose={() => setIsReservationOpen(false)}
         event={selectedEvent}
         normalUserDetail={normalUserDetail}
-        refreshReservedEvents={refreshReservedEvents} 
+        refreshReservedEvents={refreshReservedEvents}
       />
-  </div>
-  
+    </div>
   );
 }
-
 export default NormalDashboard;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Grid, Box,Typography } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Grid, Box, Typography } from '@mui/material';
 import axios from 'axios';
 
 const ChangePasswordDialog = ({ open, onClose, userEmail }) => {
@@ -7,7 +7,7 @@ const ChangePasswordDialog = ({ open, onClose, userEmail }) => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState(''); // 新增确认密码状态
-  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false); 
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
@@ -69,14 +69,14 @@ const ChangePasswordDialog = ({ open, onClose, userEmail }) => {
                 onFocus={() => setShowPasswordRequirements(true)} // Show password requirements on focus
                 onBlur={() => setShowPasswordRequirements(false)} // Hide password requirements on blur
               />
-               {/* Password Requirements */}
-               {showPasswordRequirements && (
-              <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
-                <Typography variant="body2" sx={{ color: 'gray' }}>
-                  Password must be at least 8 characters long and contain:One uppercase letter,
-                  One lowercase letter, One number and One special character (e.g., @$!%*?&#)
-                </Typography>
-              </Box>)}
+              {/* Password Requirements */}
+              {showPasswordRequirements && (
+                <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
+                  <Typography variant="body2" sx={{ color: 'gray' }}>
+                    Password must be at least 8 characters long and contain:One uppercase letter,
+                    One lowercase letter, One number and One special character (e.g., @$!%*?&#)
+                  </Typography>
+                </Box>)}
             </Grid>
             <Grid item xs={12}>
               <TextField

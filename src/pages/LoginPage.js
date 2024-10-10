@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Container, IconButton} from '@mui/material';
+import { Box, TextField, Button, Typography, Container, IconButton } from '@mui/material';
 import axios from 'axios';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate, useLocation  } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../App.css';
 function LoginPage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
@@ -13,9 +13,9 @@ function LoginPage() {
   const location = useLocation();
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${apiBaseUrl}/auth/login`, { email, password});
+      const response = await axios.post(`${apiBaseUrl}/auth/login`, { email, password });
       // Extract token and role from the response
-      const { token, role,userId } = response.data;
+      const { token, role, userId } = response.data;
       localStorage.setItem('userRole', role);  // 保存用户角色
       localStorage.setItem('userEmail', email);  // 保存用户角色
       localStorage.setItem('userId', userId);
@@ -25,9 +25,9 @@ function LoginPage() {
 
       // Redirect based on the previous location
       if (fromRegistration && location.state?.prevPage) {
-      navigate(location.state.prevPage); // Navigate to the page before registration
+        navigate(location.state.prevPage); // Navigate to the page before registration
       } else {
-      navigate(location.state?.from || -1); // Navigate to previous page or fallback to last page
+        navigate(location.state?.from || -1); // Navigate to previous page or fallback to last page
       }
     } catch (error) {
       setError('Login failed. Please check your credentials.');
@@ -39,7 +39,7 @@ function LoginPage() {
     navigate(-1);  // This navigates back to the previous page
   };
   return (
-    <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2,mt : 4  }}>
+    <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2, mt: 4 }}>
       <Box
         sx={{
           marginTop: 8,
@@ -50,7 +50,7 @@ function LoginPage() {
         }}
       >
         {/* Go Back button aligned to the left */}
-        <IconButton className="button" 
+        <IconButton className="button"
           sx={{ position: 'absolute', left: 0, top: 0 }}
           onClick={handleGoBack}
           color="primary"
@@ -82,7 +82,7 @@ function LoginPage() {
             fullWidth
             name="password"
             label="Password"
-            type= 'password'  // Toggle between text and password types
+            type='password'  // Toggle between text and password types
             id="password"
             autoComplete="current-password"
             value={password}
@@ -93,7 +93,7 @@ function LoginPage() {
             Forgot your password? <a href="/forgot-password">Reset here</a>
           </Typography>
           {error && <Typography color="error">{error}</Typography>}
-          <Button className="button" 
+          <Button className="button"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
@@ -102,7 +102,7 @@ function LoginPage() {
             Sign In
           </Button>
         </Box>
-        <Typography variant="body2" sx={{ mt: 1}}>
+        <Typography variant="body2" sx={{ mt: 1 }}>
           New user? <a href="/register">Register here</a>
         </Typography>
       </Box>

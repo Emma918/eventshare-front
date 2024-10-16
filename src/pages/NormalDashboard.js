@@ -506,14 +506,14 @@ function NormalDashboard() {
       />
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
         {/* 第一行的类别和加号/减号图标 */}
-        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
           {visibleCategories.slice(0, 6).map((category, index) => (
             <Button
               key={index}
               value={category.columnSeq}
               onClick={(e) => handleCategoryClick(e, category.columnSeq)}
               sx={{
-                fontSize: { xs: '0.4rem', sm: '0.6rem', md: '0.8rem' },
+                fontSize: { xs: '0.5rem', sm: '0.6rem', md: '0.8rem' },
                 backgroundColor: selectedCategory === category.columnSeq ? '#6E45E2' : '#1976d2',
                 color: '#fff',
                 textTransform: 'none',
@@ -522,6 +522,7 @@ function NormalDashboard() {
                 },
                 borderRadius: '12px',
                 padding: '8px 23px',
+               // flexGrow: 1, // Allow the buttons to grow and shrink as necessary
               }}
             >
               {category.columnDetail}
@@ -542,13 +543,14 @@ function NormalDashboard() {
         {/* 其余类别，仅在展开时显示 */}
         {showAll && (
           chunkCategories(eventCategorys.slice(6), 6).map((row, rowIndex) => (
-            <Box key={rowIndex} sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+            <Box key={rowIndex} sx={{ display: 'flex',flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
               {row.map((category, index) => (
                 <Button
                   key={index}
                   value={category.columnSeq}
                   onClick={(e) => handleCategoryClick(e, category.columnSeq)}
                   sx={{
+                    fontSize: { xs: '0.5rem', sm: '0.6rem', md: '0.8rem' },
                     backgroundColor: selectedCategory === category.columnSeq ? '#6E45E2' : '#1976d2',
                     color: '#fff',
                     textTransform: 'none',
@@ -557,6 +559,7 @@ function NormalDashboard() {
                     },
                     borderRadius: '12px',
                     padding: '8px 23px',
+                  //  flexGrow: 1, // Allow the buttons to grow and shrink as necessary
                   }}
                 >
                   {category.columnDetail}

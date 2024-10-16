@@ -67,11 +67,11 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
             }}
           >
             {/* 左侧导航按钮 */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Button 
+           {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
+               <Button 
                 color="inherit" 
                 className="nav-button" 
-                href="/" 
+                href="/homepage" 
                 sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px 8px', sm: '10px 16px' }, marginRight: { xs: '8px', sm: '16px' } }}
               >
                 Home
@@ -84,7 +84,18 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
               >
                 Events
               </Button>
-            </Box>
+            </Box>*/}
+            <Typography
+              variant="h6"
+              sx={{
+                fontStyle: 'italic', // 字体倾斜
+                fontWeight: 'bold',
+                letterSpacing: 1.2,
+                ml: 2, // 左侧留点间距
+              }}
+            >
+              kiwiboard.info
+            </Typography>
 
             {/* 在小屏幕下，使用汉堡包菜单代替部分按钮 */}
             <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
@@ -97,19 +108,15 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
                 onClose={handleHamburgerMenuClose}
               >
                 <MenuItem component={Link} to="/contact-us">Contact Us</MenuItem>
-                {!isLoggedIn && (
-                  <>
-                    <MenuItem component={Link} to="/login">Log in</MenuItem>
-                    <MenuItem component={Link} to="/register">Sign up</MenuItem>
-                  </>
-                )}
-                {isLoggedIn && (
-                  <>
-                    <MenuItem onClick={() => {setIsChangePasswordOpen(true);setMenuAnchorEl(null);}}>Change Password</MenuItem>
-                    <MenuItem onClick={() => {setIsEditProfileOpen(true);setMenuAnchorEl(null);}}>Edit Profile</MenuItem>
-                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                  </>
-                )}
+                {!isLoggedIn && [
+                  <MenuItem component={Link} to="/login">Log in</MenuItem>,
+                  <MenuItem component={Link} to="/register">Sign up</MenuItem>
+                ]}
+                {isLoggedIn && [
+                  <MenuItem onClick={() => { setIsChangePasswordOpen(true); setMenuAnchorEl(null); }}>Change Password</MenuItem>,
+                  <MenuItem onClick={() => { setIsEditProfileOpen(true); setMenuAnchorEl(null); }}>Edit Profile</MenuItem>,
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                ]}
               </Menu>
             </Box>
 
@@ -123,15 +130,15 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
                 padding: { xs: '4px', sm: '10px' },
               }}
             >
-            <Button 
-            color="inherit" 
-            className="nav-button" 
-            component={Link} 
-            to="/contact-us"
-            sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
-          >
-            Contact Us
-            </Button>
+              <Button
+                color="inherit"
+                className="nav-button"
+                component={Link}
+                to="/contact-us"
+                sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
+              >
+                Contact Us
+              </Button>
               {isLoggedIn ? (
                 <>
                   <Typography variant="body1" sx={{ mr: 2, fontSize: { xs: '0.75rem', sm: '1rem' } }}>{userName}</Typography>
@@ -139,24 +146,24 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
                     <AccountCircle />
                   </IconButton>
                   <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
-                    <MenuItem onClick={() => {setIsChangePasswordOpen(true);setAnchorEl(null);}}>Change Password</MenuItem>
-                    <MenuItem onClick={() => {setIsEditProfileOpen(true);setAnchorEl(null);}}>Edit Profile</MenuItem>
+                    <MenuItem onClick={() => { setIsChangePasswordOpen(true); setAnchorEl(null); }}>Change Password</MenuItem>
+                    <MenuItem onClick={() => { setIsEditProfileOpen(true); setAnchorEl(null); }}>Edit Profile</MenuItem>
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                   </Menu>
                 </>
               ) : (
                 <>
-                  <Button 
-                    color="inherit" 
-                    className="nav-button" 
+                  <Button
+                    color="inherit"
+                    className="nav-button"
                     href="/login"
                     sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
                   >
                     Log in
                   </Button>
-                  <Button 
-                    color="inherit" 
-                    className="nav-button" 
+                  <Button
+                    color="inherit"
+                    className="nav-button"
                     href="/register"
                     sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px', sm: '10px' } }}
                   >

@@ -37,7 +37,7 @@ function RegisterPage() {
         setError('Passwords do not match!');
         return;
       }
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*><]{8,}$/;
       if (!passwordRegex.test(password)) {
         setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.');
         return;

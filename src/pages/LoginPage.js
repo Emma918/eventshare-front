@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Container, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, Typography, Container, IconButton, Checkbox, FormControlLabel } from '@mui/material';
 import axios from 'axios';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -8,9 +8,17 @@ function LoginPage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Add state for showing password
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();  // Initialize useNavigate
   const location = useLocation();
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get('verified') === 'success') {
+      setSuccessMessage('Email verified successfully! You can now log in.');
+    }
+  }, [location]);
   const handleLogin = async () => {
     try {
       const response = await axios.post(`${apiBaseUrl}/auth/login`, { email, password });
@@ -22,7 +30,6 @@ function LoginPage() {
       localStorage.setItem('token', token)
       // Check if the user was coming from the registration page
       const fromRegistration = location.state?.from === '/register';
-
       // Redirect based on the previous location
       if (fromRegistration && location.state?.prevPage) {
         navigate(location.state.prevPage); // Navigate to the page before registration
@@ -30,16 +37,22 @@ function LoginPage() {
         navigate(location.state?.from || -1); // Navigate to previous page or fallback to last page
       }
     } catch (error) {
-      setError('Login failed. Please check your credentials.');
+      console.log(error);
+      setError('Login failed. Please check your email address or password.');
     }
   };
 
   // Handle go back action
   const handleGoBack = () => {
-    navigate(-1);  // This navigates back to the previous page
+    if (window.history.length > 1) {
+      navigate(-1);  // 如果有上一页，则返回上一页
+    } else {
+      navigate('/homepage');  // 否则跳转到主页
+    }
   };
   return (
     <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2, mt: 4 }}>
+      {successMessage && <Typography color="success" sx={{ mt: 2 }}>{successMessage}</Typography>}
       <Box
         sx={{
           marginTop: 8,
@@ -57,7 +70,6 @@ function LoginPage() {
         >
           <ArrowBackIcon /> {/* Arrow back icon */}
         </IconButton>
-
         {/* Centered Login heading */}
         <Typography component="h1" variant="h5" sx={{ textAlign: 'center', width: '100%' }}>
           Login
@@ -82,17 +94,25 @@ function LoginPage() {
             fullWidth
             name="password"
             label="Password"
-            type='password'  // Toggle between text and password types
+            type={showPassword ? 'text' : 'password'}  // Toggle between text and password types
             id="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-
           />
+
+          {/* Show Password Checkbox */}
+          <FormControlLabel
+            control={<Checkbox checked={showPassword} onChange={() => setShowPassword(!showPassword)} />}
+            label="Show Password"
+          />
+
           <Typography variant="body2" sx={{ mt: 1 }}>
             Forgot your password? <a href="/forgot-password">Reset here</a>
           </Typography>
+
           {error && <Typography color="error">{error}</Typography>}
+
           <Button className="button"
             fullWidth
             variant="contained"
@@ -102,6 +122,7 @@ function LoginPage() {
             Sign In
           </Button>
         </Box>
+
         <Typography variant="body2" sx={{ mt: 1 }}>
           New user? <a href="/register">Register here</a>
         </Typography>

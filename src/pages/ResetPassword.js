@@ -20,7 +20,7 @@ const ResetPassword = () => {
       setError('Passwords do not match!');
       return;
     }
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*><]{8,}$/;
     if (!passwordRegex.test(password)) {
       setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.');
       return;
@@ -62,7 +62,7 @@ const ResetPassword = () => {
         <Box sx={{ backgroundColor: '#f9f9f9', padding: 2, borderRadius: 2, mt: 1 }}>
           <Typography variant="body2" sx={{ color: 'gray' }}>
             Password must be at least 8 characters long and contain:One uppercase letter,
-            One lowercase letter, One number and One special character (e.g., @$!%*?&#)
+            One lowercase letter and One number.
           </Typography>
         </Box>)}
       <TextField

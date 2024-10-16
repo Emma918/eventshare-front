@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css';
 import TopNavBar from '../components/TopNavBar';
+import Pagination from '../components/Pagination';
 import { Box, Button, Card, CardContent, CardActions, Typography, Grid, IconButton } from '@mui/material';
 import axios from 'axios';
-import {useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import ShareIcon from '@mui/icons-material/Share';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-
+import DOMPurify from 'dompurify';
 function HomePage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
@@ -16,14 +17,14 @@ function HomePage() {
   const [userName, setUserName] = useState('');
   const userEmail = localStorage.getItem('userEmail');
   const userRole = localStorage.getItem('userRole');
-  const userId= localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId');
   const [isLoggedIn, setIsLoggedIn] = useState(!!userEmail);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const open = Boolean(anchorEl);
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 9;
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,14 +51,14 @@ function HomePage() {
     const fetchData = async () => {
       try {
         let eventsResponse;
-        if(isLoggedIn){
+        if (isLoggedIn) {
           eventsResponse = await axios.get(`${apiBaseUrl}/api/events`, {
             params: {
               userId: userId
             }
           });
-      }
-        else{
+        }
+        else {
           eventsResponse = await axios.get(`${apiBaseUrl}/api/events`);
         }
         setEvents(eventsResponse.data);
@@ -89,29 +90,30 @@ function HomePage() {
   };
 
   const handleShareEvent = (item) => {
-    if(isLoggedIn){
-    if (navigator.share) {
-      navigator
-        .share({
-          title: item.title,
-          text: `Check out this event: ${item.title}`,
-          url: `${apiAppUrl}/events/${item.eventId}`,
-        })
-        .then(() => console.log('Event shared successfully'))
-        .catch((error) => console.error('Error sharing the event:', error));
-    } else {
-      const fallbackUrl = `${apiAppUrl}/events/${item.eventId}`;
-    navigator.clipboard.writeText(fallbackUrl)
-      .then(() => {
-        alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');
-      })
-      .catch((error) => {
-        console.error('Error copying URL to clipboard:', error);
-        alert('Web Share API is not supported in this browser. Unable to share the event.');
-      });
-    }}
-    else{
-      alert("Please login first!");
+    if (isLoggedIn) {
+      if (navigator.share) {
+        navigator
+          .share({
+            title: item.title,
+            text: `Check out this event: ${item.title}`,
+            url: `${apiAppUrl}/events/${item.eventId}`,
+          })
+          .then(() => console.log('Event shared successfully'))
+          .catch((error) => console.error('Error sharing the event:', error));
+      } else {
+        const fallbackUrl = `${apiAppUrl}/events/${item.eventId}`;
+        navigator.clipboard.writeText(fallbackUrl)
+          .then(() => {
+            alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');
+          })
+          .catch((error) => {
+            console.error('Error copying URL to clipboard:', error);
+            alert('Web Share API is not supported in this browser. Unable to share the event.');
+          });
+      }
+    }
+    else {
+      navigate('/login');
     }
   };
 
@@ -120,24 +122,12 @@ function HomePage() {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
   const handleLike = async (eventId) => {
     if (isLoggedIn) {
       try {
         // Send a request to the backend to update the like count for the event
         const response = await axios.post(`${apiBaseUrl}/api/events/${eventId}/like`, { userId });
-        
+
         // Update the local event state with the new like count
         setEvents((prevEvents) =>
           prevEvents.map((event) =>
@@ -151,9 +141,9 @@ function HomePage() {
         console.error('Error updating like:', error);
       }
     } else {
-      alert("Please login first!");
+      navigate('/login');
     }
-  };  
+  };
   useEffect(() => {
     setFilteredData(events);
   }, [events]);
@@ -184,27 +174,35 @@ function HomePage() {
             <Grid item xs={12} sm={6} md={4} key={item.eventId}>
               <Card
                 className="event-card"
-                onClick={() => navigate(`/events/${item.eventId}`)}
+                onClick={() => {
+                  if (item.link) {
+                    // 如果 link 存在，则跳转到 link 对应的网页
+                    window.open(item.link, '_blank');
+                  } else {
+                    // 如果 link 不存在，则跳转到 /events/${item.eventId}
+                    navigate(`/events/${item.eventId}`);
+                  }
+                }}
               >
                 <CardContent>
                   {item.images && item.images.length > 0 && (
                     <Box className="event-image-container">
                       <div style={{ width: '260px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <img
-                          src={`${item.images[getCurrentImageIndex(item.eventId)].imagePath}`}
+                          src={`${item.images[getCurrentImageIndex(item.eventId)]}`}
                           alt={`Event Image ${getCurrentImageIndex(item.eventId) + 1}`}
                           className="event-image"
                         />
                       </div>
                       <Button
-                        onClick={(e) => { e.stopPropagation(); handlePrevImage(item.eventId, item.images); }} 
+                        onClick={(e) => { e.stopPropagation(); handlePrevImage(item.eventId, item.images); }}
                         disabled={item.images.length <= 1}
                         className="arrow-button left-arrow"
                       >
                         &lt;
                       </Button>
                       <Button
-                        onClick={(e) => { e.stopPropagation(); handleNextImage(item.eventId, item.images); }} 
+                        onClick={(e) => { e.stopPropagation(); handleNextImage(item.eventId, item.images); }}
                         disabled={item.images.length <= 1}
                         className="arrow-button right-arrow"
                       >
@@ -215,9 +213,10 @@ function HomePage() {
                   <Typography variant="h5" className="event-title">
                     {item.title}
                   </Typography>
-                  <Typography variant="body2" className="event-info">
+                  {/*
+                  <Typography variant="body2" className="event-info"> 
                     <strong>Organizer:</strong> {item.organizer}
-                  </Typography>
+                  </Typography> */}
                   <Typography variant="body2" className="event-info">
                     <strong>Date:</strong> {item.repeat ? `Every ${item.weekday}(${item.startdate} ~ ${item.enddate})` : item.startdate === item.enddate ? item.startdate : `${item.startdate} ~ ${item.enddate}`}<br />
                     <strong>Time:</strong> {item.startTime} ~ {item.endTime}
@@ -234,6 +233,13 @@ function HomePage() {
                       {item.location}
                     </a>
                   </Typography>
+                  <Typography variant="body2" component="div" sx={{
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: 'vertical',
+                  }}>
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.description) }} />
+                  </Typography>
                 </CardContent>
                 <CardActions className="card-actions">
                   <IconButton className="button" onClick={(e) => { e.stopPropagation(); handleShareEvent(item); }}>
@@ -243,11 +249,11 @@ function HomePage() {
                   <IconButton className="like-button" onClick={(e) => { e.stopPropagation(); handleLike(item.eventId); }}>
                     {item.liked ? (
                       <FavoriteIcon style={{ color: 'red' }} /> // Liked state (red heart)
-                     ) : (
-                   <FavoriteBorderIcon /> // Not liked state (outline heart)
+                    ) : (
+                      <FavoriteBorderIcon /> // Not liked state (outline heart)
                     )}
                   </IconButton>
-                  {item.likes>0 &&  (<Typography variant="body2">{item.likes}</Typography>)}
+                  {item.likes > 0 && (<Typography variant="body2">{item.likes}</Typography>)}
                 </CardActions>
               </Card>
             </Grid>
@@ -256,19 +262,12 @@ function HomePage() {
       </Grid>
 
       {/* Pagination */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
-        <Button onClick={handlePrevPage} disabled={currentPage === 1}>
-          &lt;
-        </Button>
-        {[...Array(totalPages).keys()].map((pageNumber) => (
-          <Button className="button" key={pageNumber + 1} onClick={() => handlePageChange(pageNumber + 1)} variant={currentPage === pageNumber + 1 ? 'contained' : 'outlined'}>
-            {pageNumber + 1}
-          </Button>
-        ))}
-        <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          &gt;
-        </Button>
-      </Box>
+      <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        handlePageChange={handlePageChange}
+      />
+
     </div>
   );
 }

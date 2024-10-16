@@ -23,7 +23,7 @@ function App() {
     <Router>
       <Routes>
         {/* Default route redirects to login */}
-        <Route path="/" element={<Navigate to="/homepage" />} />
+        <Route path="/" element={<Navigate to="/normal-dashboard" />} />
 
         {/* Login and Register routes */}
         <Route path="/login" element={<LoginPage setUserRole={setUserRole} />} /> {/* Pass down setUserRole */}

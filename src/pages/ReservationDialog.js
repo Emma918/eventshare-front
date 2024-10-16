@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Button, MenuItem, TextField, Select, Grid, Box } from '@mui/material';
 import axios from 'axios';
 
-const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshReservedEvents }) => {
+const ReservationDialog = ({ open, onClose, event, normalUserDetail }) => {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const [selectedDate, setSelectedDate] = useState('');
   const [availableDates, setAvailableDates] = useState([]);
@@ -66,7 +66,6 @@ const ReservationDialog = ({ open, onClose, event, normalUserDetail, refreshRese
     try {
       await axios.post(`${apiBaseUrl}/api/events/reservations/${event.eventId}`, reservation);
       alert('Reservation successful!');
-      refreshReservedEvents(); // Refresh reserved events after a successful reservation
       onClose();
     } catch (error) {
       if (error.response && error.response.status === 409) {

@@ -41,12 +41,6 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
   };
   const handleDeleteExistingImage = async (index) => {
     try {
-      // Delete image from the server
-      const imagePath = existingImages[index].imagePath.replace(/\\/g, '/'); // Replace backslashes with forward slashes
-      const encodedImagePath = encodeURIComponent(imagePath);
-      await axios.delete(`${apiBaseUrl}/api/eventImage/${newEvent.eventId}?imagePath=${encodedImagePath}`);
-
-      // Update state to remove the image from the UI
       const updatedExistingImages = existingImages.filter((_, i) => i !== index);
       setExistingImages(updatedExistingImages);
     } catch (error) {
@@ -132,7 +126,7 @@ const AddEditEventDialog = ({ open, onClose, newEvent, setNewEvent, handleEventS
         <input type="file" name="images" accept="image/*" multiple onChange={handleImageChange} />
         {existingImages && existingImages.map((image, index) => (
           <Box key={index} sx={{ mt: 2, position: 'relative' }}>
-            <img src={`${image.imagePath}`} alt={`Existing  ${index}`} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+            <img src={`${image}`} alt={`Existing  ${index}`} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
             <IconButton sx={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'white', borderRadius: '50%' }} onClick={() => handleDeleteExistingImage(index)} size="small"><Delete /></IconButton>
           </Box>
         ))}

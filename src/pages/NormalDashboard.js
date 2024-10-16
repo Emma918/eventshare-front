@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../App.css';
 import TopNavBar from '../components/TopNavBar';
-import { IconButton, TextField, Button, Box, Typography, Card, CardContent, CardActions, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import Pagination from '../components/Pagination';
+import { IconButton, TextField, Button, Box, Typography, Card, CardContent, CardActions, ToggleButtonGroup, ToggleButton, CircularProgress } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -18,6 +19,8 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'; // 引入样式
 import ShareIcon from '@mui/icons-material/Share';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 // 设置本地时间
 const localizer = momentLocalizer(moment);
 // 生成从 startdate 到 enddate 的每一天
@@ -83,7 +86,7 @@ function CustomEvent({ event }) {
       {event.images && event.images.length > 0 && (
         <div style={{ marginRight: '30px' }}> {/* 图片和内容之间的间距 */}
           <img
-            src={`${event.images[0].imagePath}`}
+            src={`${event.images[0]}`}
             alt="Event"
             style={{ width: '100px', height: '100px', objectFit: 'contain' }} // 设置图片尺寸
           />
@@ -93,6 +96,9 @@ function CustomEvent({ event }) {
       {/* 内容部分：标题、时间、地点 */}
       <div>
         <strong>{event.title}</strong>
+        {event.liked && (
+          <FavoriteIcon style={{ color: 'red', marginLeft: '10px' }} />  // 显示红心
+        )}
         <p>{event.time}</p>
         <p>{event.location}</p>
       </div>
@@ -106,6 +112,9 @@ function CustomEventForWeek({ event }) {
       {/* 内容部分：标题、时间、地点 */}
       <div>
         <strong>{event.title}</strong>
+        {event.liked && (
+          <FavoriteIcon style={{ color: 'red', marginLeft: '10px' }} />  // 显示红心
+        )}
         <p>{event.time}</p>
         <p>{event.location}</p>
       </div>
@@ -115,13 +124,14 @@ function CustomEventForWeek({ event }) {
 function NormalDashboard() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const apiAppUrl = process.env.REACT_APP_API_FRONTEND_URL;
+  const [loading, setLoading] = useState(true);  // Add loading state
   const [events, setEvents] = useState([]);
+  const [showAll, setShowAll] = useState(false); // 控制是否显示全部类别
   const [orignevents, setOrignEvents] = useState([]);
   const [currentEvents, setCurrentEvents] = useState([]);
   const [date, setDate] = useState(null);
   const [location, setLocation] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [reservedEvents, setReservedEvents] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);  // 控制菜单
   const open = Boolean(anchorEl);
   const [userName, setUserName] = useState('');  // 初始化 userName 为空字符串
@@ -136,9 +146,10 @@ function NormalDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDate, setCurrentDate] = useState('');
   const [hoveredDate, setHoveredDate] = useState(null); // 追踪鼠标悬停的日期
+  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(null);
   const inputRef = useRef(null);  // 创建 ref 引用
-  const eventsPerPage = 5;
+  const eventsPerPage = 9;
   const navigate = useNavigate();
 
   // 获取传回的 viewMode，仅当从 EventDetail 返回时处理
@@ -153,10 +164,15 @@ function NormalDashboard() {
 
   // 将活动数据转换为日历事件格式
   const eventListForCalendar = filteredEvents.flatMap(event => {
-
-    let dates = event.repeat
-      ? getDateRangeByWeekday(event.startdate, event.enddate, event.weekday) // 处理重复的事件
-      : getDateRange(event.startdate, event.enddate); // 非重复事件
+    let dates;
+    if (event.dates) {
+      dates = event.dates;
+    }
+    else {
+      dates = event.repeat
+        ? getDateRangeByWeekday(event.startdate, event.enddate, event.weekday) // 处理重复的事件
+        : getDateRange(event.startdate, event.enddate); // 非重复事件
+    }
     // 再次过滤，只保留与用户选择的日期匹配的日期
     if (date) {
       const inputDate = new Date(date);
@@ -192,12 +208,21 @@ function NormalDashboard() {
         allDay: view === 'week' || view === 'day', // Treat as all-day event in week/day view
         images: event.images,
         time: `${event.startTime} ~ ${event.endTime}`,
+        liked: event.liked,
+        link: event.link,
       };
     });
   });
   // 当点击日历中的某个事件时，跳转到 EventDetail 页面
   const handleSelectEvent = (event) => {
-    navigate(`/events/${event.eventId}`, { state: { viewMode: viewMode, from: 'NormalDashboard' } }); // 跳转到 eventId 对应的 EventDetail 页面
+    if (event.link) {
+      // 如果 link 存在，则跳转到 link 对应的网页
+      window.open(event.link, '_blank');
+    } else {
+      // 如果 link 不存在，则跳转到 /events/${event.eventId}
+      navigate(`/events/${event.eventId}`, { state: { viewMode: viewMode, from: 'NormalDashboard' } }); // 跳转到 eventId 对应的 EventDetail 页面
+    }
+
   };
   useEffect(() => {
     const checkIfEventsFull = async (events) => {
@@ -209,7 +234,6 @@ function NormalDashboard() {
             const { data: reservationCount } = await axios.get(`${apiBaseUrl}/api/${event.eventId}/reservnum?date=${event.startdate}`);
             // 判断是否预约满了
             isFull = reservationCount >= event.capacity;
-            console.log(isFull);
           }
           // 返回一个新的事件对象，添加了是否已满的标记
           return {
@@ -223,23 +247,29 @@ function NormalDashboard() {
       return updatedEvents; // Return the updated events
     };
     const fetchEvents = async () => {
-      let response;
-      if(isLoggedIn){
-        response = await axios.get(`${apiBaseUrl}/api/events`, {
-          params: {
-            userId: userId
-          }
-        });
-    }
-      else{
-        response = await axios.get(`${apiBaseUrl}/api/events`);
-      }
-      if (response.length !== 0) {
-        const eventsData = response.data;
-        const updatedEvents = await checkIfEventsFull(eventsData);
-        setEvents(updatedEvents);
-        setOrignEvents(updatedEvents);
-        setFilteredEvents(updatedEvents);
+      try {
+        let response;
+        if (isLoggedIn) {
+          response = await axios.get(`${apiBaseUrl}/api/events`, {
+            params: {
+              userId: userId,
+            },
+          });
+        }
+        else {
+          response = await axios.get(`${apiBaseUrl}/api/events`);
+        }
+        if (response.length !== 0) {
+          const eventsData = response.data;
+          const updatedEvents = await checkIfEventsFull(eventsData);
+          setEvents(updatedEvents);
+          setOrignEvents(updatedEvents);
+          setFilteredEvents(updatedEvents);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false); // Ensure loading is false after fetching and processing data
       }
     };
     fetchEvents();
@@ -255,7 +285,16 @@ function NormalDashboard() {
     const formattedDate = date.toLocaleDateString();  // 格式化日期
     setCurrentDate(formattedDate);  // 设置格式化的日期
   }, [apiBaseUrl]);
+  const chunkCategories = (categories, chunkSize) => {
+    const chunks = [];
+    for (let i = 0; i < categories.length; i += chunkSize) {
+      chunks.push(categories.slice(i, i + chunkSize));
+    }
+    return chunks;
+  };
 
+  // 只显示前6个或全部类别
+  const visibleCategories = showAll ? eventCategorys : eventCategorys.slice(0, 6);
 
   // 获取用户详细信息
   useEffect(() => {
@@ -275,17 +314,6 @@ function NormalDashboard() {
       fetchUserDetails();  // 如果用户邮箱存在，则获取详细信息
     }
   }, [userEmail, normalUserDetail, apiBaseUrl]);
-  // Fetch reserved events
-  const refreshReservedEvents = async () => {
-    try {
-      const response = await axios.get(`${apiBaseUrl}/api/user/reserved-events/${userEmail}`);
-      if (response.length !== 0) {
-        setReservedEvents(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching reserved events:', error);
-    }
-  };
 
   const filterEvents = () => {
     let uniqueEvents = events;
@@ -331,7 +359,7 @@ function NormalDashboard() {
     let uniqueEvents = orignevents;
     const categoryValue = Number(e.currentTarget.value);
     if (categoryValue !== 0) {
-      uniqueEvents = uniqueEvents.filter(event => event.category === categoryValue);
+      uniqueEvents = uniqueEvents.filter(event => event.category.includes(categoryValue));
     }
     setEvents(uniqueEvents);
     setFilteredEvents(uniqueEvents);
@@ -347,7 +375,7 @@ function NormalDashboard() {
       setIsReservationOpen(true); // 打开预约窗口
       console.log('Selected event:', event)
     } else {
-      alert("Please login first!");
+      navigate('/login');
     }
   };
   // Pagination handlers
@@ -355,18 +383,6 @@ function NormalDashboard() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
   };
 
   useEffect(() => {
@@ -409,19 +425,19 @@ function NormalDashboard() {
       onMouseLeave: handleMouseLeave, // 处理鼠标离开事件
     };
   };
-  const handleShareEvent = (item) => {
+  const handleShareEvent = (event) => {
     if (isLoggedIn) {
       if (navigator.share) {
         navigator
           .share({
-            title: item.title,
-            text: `Check out this event: ${item.title}`,
-            url: `${apiAppUrl}/events/${item.eventId}`,
+            title: event.title,
+            text: `Check out this event: ${event.title}`,
+            url: `${apiAppUrl}/events/${event.eventId}`,
           })
           .then(() => console.log('Event shared successfully'))
           .catch((error) => console.error('Error sharing the event:', error));
       } else {
-        const fallbackUrl = `${apiAppUrl}/events/${item.eventId}`;
+        const fallbackUrl = `${apiAppUrl}/events/${event.eventId}`;
         navigator.clipboard.writeText(fallbackUrl)
           .then(() => {
             alert('Browser does not support sharing, but the event URL has been copied to your clipboard.');
@@ -433,7 +449,7 @@ function NormalDashboard() {
       }
     }
     else {
-      alert("Please login first!");
+      navigate('/login');
     }
   };
   const handleLike = async (eventId) => {
@@ -455,8 +471,25 @@ function NormalDashboard() {
         console.error('Error updating like:', error);
       }
     } else {
-      alert("Please login first!");
+      navigate('/login');
     }
+  };
+  const handleNextImage = (eventId, images) => {
+    setCurrentImageIndexes((prevIndexes) => {
+      const newIndex = ((prevIndexes[eventId] || 0) + 1) % images.length;
+      return { ...prevIndexes, [eventId]: newIndex };
+    });
+  };
+
+  const handlePrevImage = (eventId, images) => {
+    setCurrentImageIndexes((prevIndexes) => {
+      const newIndex = ((prevIndexes[eventId] || 0) - 1 + images.length) % images.length;
+      return { ...prevIndexes, [eventId]: newIndex };
+    });
+  };
+
+  const getCurrentImageIndex = (eventId) => {
+    return currentImageIndexes[eventId] || 0;
   };
   return (
     <div className="container">
@@ -471,26 +504,67 @@ function NormalDashboard() {
         setIsLoggedIn={setIsLoggedIn}
         setAnchorEl={setAnchorEl}
       />
-      <Box sx={{ display: 'flex', gap: 0.5, mt: 2 }}>
-        {eventCategorys && eventCategorys.map((categorys, index) => (
-          <Button
-            key={index}
-            value={categorys.columnSeq}
-            onClick={(e) => handleCategoryClick(e, categorys.columnSeq)}
-            sx={{
-              backgroundColor: selectedCategory === categorys.columnSeq ? '#6E45E2' : '#1976d2 ', // 选中时紫色 (#800080)，未选中时蓝色 (#1976d2)
-              color: '#fff', // 所有按钮文字颜色都为白色
-              textTransform: 'none',
-              '&:hover': {
-                backgroundColor: selectedCategory === categorys.columnSeq ? '#6E45E2' : '#1976d2 ', // 悬停时选中按钮变浅紫色，未选中按钮变浅蓝色
-              },
-              borderRadius: '12px',
-              padding: '8px 23px'
-            }}
-          >
-            {categorys.columnDetail}
-          </Button>
-        ))}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+        {/* 第一行的类别和加号/减号图标 */}
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          {visibleCategories.slice(0, 6).map((category, index) => (
+            <Button
+              key={index}
+              value={category.columnSeq}
+              onClick={(e) => handleCategoryClick(e, category.columnSeq)}
+              sx={{
+                fontSize: { xs: '0.4rem', sm: '0.6rem', md: '0.8rem' },
+                backgroundColor: selectedCategory === category.columnSeq ? '#6E45E2' : '#1976d2',
+                color: '#fff',
+                textTransform: 'none',
+                '&:hover': {
+                  backgroundColor: selectedCategory === category.columnSeq ? '#6E45E2' : '#1976d2',
+                },
+                borderRadius: '12px',
+                padding: '8px 23px',
+              }}
+            >
+              {category.columnDetail}
+            </Button>
+          ))}
+
+          {/* 加号/减号按钮 */}
+          {eventCategorys.length > 6 && (
+            <IconButton
+              onClick={() => setShowAll((prev) => !prev)} // 切换显示状态
+              sx={{ padding: 1 }}
+            >
+              {showAll ? <RemoveIcon /> : <AddIcon />}
+            </IconButton>
+          )}
+        </Box>
+
+        {/* 其余类别，仅在展开时显示 */}
+        {showAll && (
+          chunkCategories(eventCategorys.slice(6), 6).map((row, rowIndex) => (
+            <Box key={rowIndex} sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+              {row.map((category, index) => (
+                <Button
+                  key={index}
+                  value={category.columnSeq}
+                  onClick={(e) => handleCategoryClick(e, category.columnSeq)}
+                  sx={{
+                    backgroundColor: selectedCategory === category.columnSeq ? '#6E45E2' : '#1976d2',
+                    color: '#fff',
+                    textTransform: 'none',
+                    '&:hover': {
+                      backgroundColor: selectedCategory === category.columnSeq ? '#6E45E2' : '#1976d2',
+                    },
+                    borderRadius: '12px',
+                    padding: '8px 23px',
+                  }}
+                >
+                  {category.columnDetail}
+                </Button>
+              ))}
+            </Box>
+          ))
+        )}
       </Box>
       {/* 日期选择和地点输入 */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
@@ -521,7 +595,6 @@ function NormalDashboard() {
           }}
           onChange={(e) => setLocation(e.target.value)}
         />
-
         <Button variant="contained" className="button" onClick={filterEvents} sx={{ height: '50px' }}>
           Search
         </Button>
@@ -544,81 +617,126 @@ function NormalDashboard() {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
+
       {/* 列表模式 */}
       {viewMode === 'list' ? (
-        <Box sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
-            {currentEvents.length === 0 ? (
+        <Box
+          sx={{
+            mt: 4, // 增加检索框与卡片之间的距离 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4, // 控制卡片之间的间距
+          }}
+        >
+          <Grid
+            container
+            spacing={4} // Control card spacing
+            sx={{
+              maxWidth: '960px', // 限制页面宽度
+              margin: '0 auto', // 让内容居中
+              rowGap: 6, // 增加每行之间的间距
+            }}
+          >
+            {loading ? (
+              <CircularProgress /> // 显示加载指示器
+            ) : currentEvents.length === 0 ? (
               <Typography>No Events Available!</Typography>
             ) : (
-              currentEvents.map(event => (
-                <Grid item xs={12} key={event.eventId}>
-                  <Card sx={{ mb: 3, width: '90%' }} className="event-card">
-                    <CardContent>
-                      <Box className="event-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                        {/* Title on the left */}
-                        <Typography className="event-title" variant="h5">
-                          {event.title}
-                        </Typography>
-
-                        {/* Buttons on the right */}
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <IconButton className="event-share-btn" onClick={() => handleShareEvent(event)}>
-                            <ShareIcon />
-                          </IconButton>
-                          <Typography variant="body2">Share</Typography>
-                          <IconButton className="like-button" onClick={() => handleLike(event.eventId)}>
-                            {event.liked ? (
-                              <FavoriteIcon style={{ color: 'red' }} /> // Liked state (red heart)
-                            ) : (
-                              <FavoriteBorderIcon /> // Not liked state (outline heart)
-                            )}
-                          </IconButton>
-                          {event.likes > 0 && (<Typography variant="body2">{event.likes}</Typography>)}
+              currentEvents.map((event) => (
+                <Grid event xs={12} sm={6} md={4} key={event.eventId}>
+                  <Card className="event-card"
+                     sx={{
+                      maxWidth: '280px', // 设置卡片的最大宽度
+                      height: '100%', // 控制卡片高度
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      padding: 1.5, // 缩小内边距
+                      boxShadow: 3, // 添加阴影
+                      transition: 'transform 0.2s', // 鼠标悬停时动画效果
+                      '&:hover': {
+                        transform: 'scale(1.05)', // 放大效果
+                      },
+                    }}
+                    onClick={() => {
+                      if (event.link) {
+                        window.open(event.link, '_blank');
+                      } else {
+                        navigate(`/events/${event.eventId}`);
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ flex: '1 1 auto' }}>
+                      {event.images && event.images.length > 0 && (
+                        <Box className="event-image-container">
+                          <div style={{ width: '260px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <img
+                              src={`${event.images[getCurrentImageIndex(event.eventId)]}`}
+                              alt={`Event Image ${getCurrentImageIndex(event.eventId) + 1}`}
+                              className="event-image"
+                            />
+                          </div>
+                          <Button
+                            onClick={(e) => { e.stopPropagation(); handlePrevImage(event.eventId, event.images); }}
+                            disabled={event.images.length <= 1}
+                            className="arrow-button left-arrow"
+                          >
+                            &lt;
+                          </Button>
+                          <Button
+                            onClick={(e) => { e.stopPropagation(); handleNextImage(event.eventId, event.images); }}
+                            disabled={event.images.length <= 1}
+                            className="arrow-button right-arrow"
+                          >
+                            &gt;
+                          </Button>
                         </Box>
-                      </Box>
-                      <Link to={`/events/${event.eventId}`} state={{ from: 'NormalDashboard', viewMode: viewMode }} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <Grid container spacing={2}>
-                          {/* Left side: Event details */}
-                          <Grid item xs={6}>
-                            <Typography variant="body2">
-                              {event.organizer}<br />
-                              Date: {event.repeat ? `Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate === event.enddate ? event.startdate : `${event.startdate} ~ ${event.enddate}`}  <br />
-                              Time:{event.startTime} ~ {event.endTime} <br />
-                              Location: {event.location} <br />
-                              Capacity: {event.capacity} <br />
-                              Level: {event.levelname} <br />
-                              Free: {event.isFree ? 'Yes' : 'No'} <br />
-                              {event.reserve ? 'Reservation Required' : 'No Reservation Required'} <br />
-                              <Typography variant="body2" component="div" sx={{
-                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
-                                WebkitLineClamp: 1,
-                                WebkitBoxOrient: 'vertical',
-                              }}>
-                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
-                              </Typography><br />
-                            </Typography>
-                          </Grid>
-                          {/* Right side: Event image */}
-                          <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            {event.images && event.images.length > 0 && (
-                              <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                <img
-                                  src={`${event.images[0].imagePath}`}
-                                  alt="Event"
-                                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                />
-                              </div>
-                            )}
-                          </Grid>
-                        </Grid>
-                      </Link>
+                      )}
+                      <Typography variant="h5" className="event-title">
+                        {event.title}
+                      </Typography>
+                      {/*
+                  <Typography variant="body2" className="event-info"> 
+                    <strong>Organizer:</strong> {event.organizer}
+                  </Typography> */}
+                      <Typography variant="body2" className="event-info">
+                        <strong>Date:</strong> {event.repeat ? `Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate === event.enddate ? event.startdate : `${event.startdate} ~ ${event.enddate}`}<br />
+                        <strong>Time:</strong> {event.startTime} ~ {event.endTime}
+                      </Typography>
+                      <Typography variant="body2" className="event-info">
+                        <strong>Location:</strong>{' '}
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ textDecoration: 'underline' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {event.location}
+                        </a>
+                      </Typography>
+                      <Typography variant="body2" component="div" sx={{
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: 'vertical',
+                      }}>
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
+                      </Typography>
                     </CardContent>
-                    <CardActions>
-                      {event.reserve && (event.isFull ? (<Typography variant="body1" color="error">Fully Reserved</Typography>) : (
-                        <Button className='button' variant="contained" onClick={() => handleReserveClick(event)}>
-                          Reserve
-                        </Button>))}
+                    <CardActions sx={{ justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <IconButton className='button'onClick={(e) => { e.stopPropagation(); handleShareEvent(event); }}>
+                          <ShareIcon />
+                        </IconButton>
+                        <Typography variant="body2">Share</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <IconButton className='button' onClick={(e) => { e.stopPropagation(); handleLike(event.eventId); }}>
+                          {event.liked ? <FavoriteIcon sx={{ color: 'red' }} /> : <FavoriteBorderIcon />}
+                        </IconButton>
+                        {event.likes > 0 && <Typography variant="body2">{event.likes}</Typography>}
+                      </Box>
                     </CardActions>
                   </Card>
                 </Grid>
@@ -626,23 +744,11 @@ function NormalDashboard() {
             )}
           </Grid>
           {/* Pagination */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
-            <Button onClick={handlePrevPage} disabled={currentPage === 1}>
-              &lt;
-            </Button>
-            {[...Array(totalPages).keys()].map((pageNumber) => (
-              <Button className='button'
-                key={pageNumber + 1}
-                onClick={() => handlePageChange(pageNumber + 1)}
-                variant={currentPage === pageNumber + 1 ? 'contained' : 'outlined'}
-              >
-                {pageNumber + 1}
-              </Button>
-            ))}
-            <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
-              &gt;
-            </Button>
-          </Box>
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handlePageChange={handlePageChange}
+          />
         </Box>
       ) : (
         // 日历视图
@@ -674,7 +780,6 @@ function NormalDashboard() {
         onClose={() => setIsReservationOpen(false)}
         event={selectedEvent}
         normalUserDetail={normalUserDetail}
-        refreshReservedEvents={refreshReservedEvents}
       />
     </div>
   );

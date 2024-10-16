@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../App.css';
 import TopNavBar from '../components/TopNavBar';
+import Pagination from '../components/Pagination';
 import { TextField, Box, Button, IconButton, Typography, Dialog, Card, CardContent, DialogActions, DialogContent, Grid } from '@mui/material';
 import { CopyAll, Delete, Edit, FileDownload } from '@mui/icons-material';
 import ShareIcon from '@mui/icons-material/Share';
@@ -140,7 +141,6 @@ function AdminDashboard() {
   // 提交新增活动
   const handleAddEventSubmit = async (formData) => {
     try {
-      console.log('newEvent:', formData); // Check what is being sent to the backend
       const response = await axios.post(`${apiBaseUrl}/api/events`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // Set the correct headers for file upload
@@ -313,18 +313,6 @@ function AdminDashboard() {
     setCurrentPage(pageNumber);
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
   // Get current events for the page
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
@@ -372,7 +360,17 @@ function AdminDashboard() {
                   <IconButton onClick={() => handleDeleteEventOpen(event)}><Delete /></IconButton>
                 </Box>
               </Box>
-              <Link to={`/events/${event.eventId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link
+                onClick={(e) => {
+                  if (event.link) {
+                    e.preventDefault(); // 防止默认的内部跳转
+                    window.open(event.link, '_blank'); // 在新标签中打开外部链接
+                  }
+                }}
+                to={`/events/${event.eventId}`}
+                state={{ from: 'AdminDashboard' }}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Typography sx={{ color: 'gray' }}> {event.organizer}</Typography>
@@ -380,8 +378,8 @@ function AdminDashboard() {
                     <Typography><strong>Date:</strong> {event.repeat ? `Every ${event.weekday}(${event.startdate} ~ ${event.enddate})` : event.startdate === event.enddate ? event.startdate : `${event.startdate} ~ ${event.enddate}`}</Typography>
                     <Typography><strong>Time:</strong> {event.startTime} ~ {event.endTime}</Typography>
                     <Typography><strong>Location:</strong> {event.location}</Typography>
-                    <Typography><strong>Capacity:</strong> {event.capacity}</Typography>
-                    <Typography><strong>Level:</strong> {event.levelname}</Typography>
+                    {/*<Typography><strong>Capacity:</strong> {event.capacity}</Typography>
+                    <Typography><strong>Level:</strong> {event.levelname}</Typography>*/}
                     <Typography><strong>Free Event:</strong> {event.isFree ? 'Yes' : 'No'}</Typography>
                     <Typography><strong>Reservation:</strong> {event.reserve ? 'Reservation Required' : 'No Reservation Required'}</Typography>
                   </Grid>
@@ -389,7 +387,7 @@ function AdminDashboard() {
                     {event.images && event.images.length > 0 && (
                       <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <img
-                          src={`${event.images[0].imagePath}`}
+                          src={`${event.images[0]}`}
                           alt="Event"
                           style={{ width: '100%', height: 'auto', maxHeight: '150px', objectFit: 'contain' }}
                         />
@@ -406,23 +404,12 @@ function AdminDashboard() {
           </Card>
         )))}
       {/* Pagination */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
-        <Button onClick={handlePrevPage} disabled={currentPage === 1}>
-          &lt;
-        </Button>
-        {[...Array(totalPages).keys()].map((pageNumber) => (
-          <Button className='button'
-            key={pageNumber + 1}
-            onClick={() => handlePageChange(pageNumber + 1)}
-            variant={currentPage === pageNumber + 1 ? 'contained' : 'outlined'}
-          >
-            {pageNumber + 1}
-          </Button>
-        ))}
-        <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
-          &gt;
-        </Button>
-      </Box>
+      {/* Pagination */}
+      <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        handlePageChange={handlePageChange}
+      />
       {/* 新增或编辑活动窗口 */}
       <AddEditEventDialog
         open={openAdd || openEdit}

@@ -135,22 +135,6 @@ body {
   margin-right: 16px;
 }
 
-/* For mobile screens (small devices) */
-@media (max-width: 600px) {
-  .event-title {
-    font-size: 1.5rem;
-    text-align: left;
-  }
-
-  .event-header {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .event-share-btn {
-    margin-left: auto;
-  }
-}
 /* Typography for event details */
 .event-info {
   color: #555;
@@ -199,11 +183,6 @@ body {
   margin-right: 15px;
   border-radius: 12px;
   transition: background-color 0.3s ease;
-}
-@media (max-width: 600px) {
-  .nav-button {
-    width: 50%;  
-  }
 }
 .nav-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
@@ -360,6 +339,7 @@ body {
   margin-left: 0;
   margin-right: auto;
 }
+
 /* 隐藏时间轴部分 */
 .rbc-time-content {
   display: none !important; /* 强制隐藏时间内容 */
@@ -449,26 +429,53 @@ body {
   height: auto !important;
   min-height: 100% !important;
 }
-@media (max-width: 600px) {
-  .rbc-calendar {
-    width: 100% !important;
-    overflow-x: auto;  /* 允许水平滚动以防止溢出 */
+  @media (max-width: 600px) {
+    .contact-container.MuiContainer-root {
+      background-color: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 32px;
+      max-width: 600px;
+      width: 100%;
+      text-align: left;
+      margin-left: 0;
+      margin-right: auto;
+    }
+    .rbc-calendar {
+      width: 100% !important;
+      overflow-x: auto;  /* 允许水平滚动以防止溢出 */
+    }
+  
+    .rbc-time-content {
+      flex-direction: column; /* 将日程表竖直排列 */
+      height: auto !important;  /* 让高度自适应 */
+    }
+  
+    .rbc-time-header, .rbc-time-header-content {
+      display: block; /* 防止标题部分被压缩 */
+    }
+    .rbc-event {
+      font-size: 12px;  /* 减小字体 */
+      padding: 5px;  /* 减少内边距 */
+    }
+    .calendar-container {
+      height: 100%;
+      overflow: auto; /* 允许滚动 */
+  }
+  .nav-button {
+    width: 50%;  
+  }
+  .event-title {
+    font-size: 1.5rem;
+    text-align: left;
   }
 
-  .rbc-time-content {
-    flex-direction: column; /* 将日程表竖直排列 */
-    height: auto !important;  /* 让高度自适应 */
+  .event-header {
+    flex-direction: row;
+    justify-content: space-between;
   }
 
-  .rbc-time-header, .rbc-time-header-content {
-    display: block; /* 防止标题部分被压缩 */
-  }
-  .rbc-event {
-    font-size: 12px;  /* 减小字体 */
-    padding: 5px;  /* 减少内边距 */
-  }
-  .calendar-container {
-    height: 100%;
-    overflow: auto; /* 允许滚动 */
+  .event-share-btn {
+    margin-left: auto;
   }
 }

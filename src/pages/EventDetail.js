@@ -33,8 +33,6 @@ const EventDetail = () => {
   const navigate = useNavigate();
   const viewMode = location.state?.viewMode || 'list';
   const from = location.state?.from || null;
-  console.log('viewMode', viewMode);
-  console.log('from', from);
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -119,7 +117,7 @@ const EventDetail = () => {
           });
       }
     } else {
-      alert("Please login first!");
+      navigate('/login');
     }
   };
   const handleLike = async (eventId) => {
@@ -138,7 +136,7 @@ const EventDetail = () => {
         console.error('Error updating like:', error);
       }
     } else {
-      alert("Please login first!");
+      navigate('/login');
     }
   };
   // 点击课程卡片进行预约
@@ -148,18 +146,7 @@ const EventDetail = () => {
       setIsReservationOpen(true); // 打开预约窗口
       console.log('Selected event:', event)
     } else {
-      alert("Please login first!");
-    }
-  };
-  // Fetch reserved events
-  const refreshReservedEvents = async () => {
-    try {
-      const response = await axios.get(`${apiBaseUrl}/api/user/reserved-events/${userEmail}`);
-      if (response.length !== 0) {
-        setReservedEvents(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching reserved events:', error);
+      navigate('/login');
     }
   };
   const handleGoBack = () => {
@@ -196,7 +183,7 @@ const EventDetail = () => {
           <Box className="event-image-container">
             {/* Display the current image */}
             <img
-              src={`${event.images[currentImageIndex].imagePath}`}
+              src={`${event.images[currentImageIndex]}`}
               alt={`Event Image ${currentImageIndex + 1}`}
               className="event-image"
             />
@@ -271,7 +258,6 @@ const EventDetail = () => {
         onClose={() => setIsReservationOpen(false)}
         event={selectedEvent}
         normalUserDetail={normalUserDetail}
-        refreshReservedEvents={refreshReservedEvents}
       />
     </div>
   );

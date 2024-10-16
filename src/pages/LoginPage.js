@@ -47,7 +47,8 @@ function LoginPage() {
     if (window.history.length > 1) {
       navigate(-1);  // 如果有上一页，则返回上一页
     } else {
-      navigate('/homepage');  // 否则跳转到主页
+      navigate('/normal-dashboard');
+      //navigate('/homepage');  // 否则跳转到主页
     }
   };
   return (

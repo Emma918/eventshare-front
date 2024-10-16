@@ -16,7 +16,9 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
     setIsLoggedIn(false);
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userRole');
-    window.location.href = '/homepage';
+    //window.location.href = '/homepage';
+    window.location.href = '/normal-dashboard';
+    
   };
 
   const handleEventsOpen = () => {

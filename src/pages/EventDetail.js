@@ -229,7 +229,7 @@ const EventDetail = () => {
             {event.likes > 0 && (<Typography variant="body2">{event.likes}</Typography>)}
           </Box>
         </Box>
-        <Typography variant="body1"><strong>Organizer:</strong>{event.organizer}</Typography>
+        {event.organizer && (<Typography variant="body1"><strong>Organizer:</strong>{event.organizer}</Typography>)}
         <Typography variant="body1"><strong>Date:</strong> {event.repeat ? `Every ${event.weekday} (${event.startdate} ~ ${event.enddate})`
           : event.startdate === event.enddate ?
             event.startdate
@@ -242,10 +242,10 @@ const EventDetail = () => {
             style={{ color: 'black', textDecoration: 'underline' }}>
             {event.location}
           </a></Typography>
-        <Typography variant="body1"><strong>Capacity:</strong> {event.capacity}</Typography>
-        <Typography variant="body1"><strong>Level:</strong> {event.levelname}</Typography>
+        {event.capacity && (<Typography variant="body1"><strong>Capacity:</strong> {event.capacity}</Typography>)}
+        {event.levelname && (<Typography variant="body1"><strong>Level:</strong> {event.levelname}</Typography>)}
         <Typography variant="body1"><strong>Free:</strong> {event.isFree ? 'Yes' : 'No'}</Typography>
-        <Typography variant="body1"><strong>Description:</strong></Typography>
+        <Typography variant="body1"></Typography>
         <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }} />
         {event.reserve && (event.isFull ? (<Typography variant="body1" color="error"><strong>Fully Reserved</strong></Typography>) : (
           <Button className='button' variant="contained" onClick={() => handleReserveClick(event)}>

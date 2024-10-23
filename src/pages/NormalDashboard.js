@@ -522,7 +522,7 @@ function NormalDashboard() {
                 },
                 borderRadius: '12px',
                 padding: '8px 23px',
-               // flexGrow: 1, // Allow the buttons to grow and shrink as necessary
+                // flexGrow: 1, // Allow the buttons to grow and shrink as necessary
               }}
             >
               {category.columnDetail}
@@ -543,7 +543,7 @@ function NormalDashboard() {
         {/* 其余类别，仅在展开时显示 */}
         {showAll && (
           chunkCategories(eventCategorys.slice(6), 6).map((row, rowIndex) => (
-            <Box key={rowIndex} sx={{ display: 'flex',flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+            <Box key={rowIndex} sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
               {row.map((category, index) => (
                 <Button
                   key={index}
@@ -559,7 +559,7 @@ function NormalDashboard() {
                     },
                     borderRadius: '12px',
                     padding: '8px 23px',
-                  //  flexGrow: 1, // Allow the buttons to grow and shrink as necessary
+                    //  flexGrow: 1, // Allow the buttons to grow and shrink as necessary
                   }}
                 >
                   {category.columnDetail}
@@ -574,7 +574,7 @@ function NormalDashboard() {
         {/* Date Picker 和 Location 输入框 */}
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
-            label="Select Date"
+            label="Date"
             value={date}
             onChange={(newValue) => setDate(newValue)}
             renderInput={(params) => (
@@ -589,7 +589,7 @@ function NormalDashboard() {
         </LocalizationProvider>
 
         <TextField
-          label="Search by Location"
+          label="Location"
           value={location}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -649,7 +649,7 @@ function NormalDashboard() {
               currentEvents.map((event) => (
                 <Grid event xs={12} sm={6} md={4} key={event.eventId}>
                   <Card className="event-card"
-                     sx={{
+                    sx={{
                       maxWidth: '280px', // 设置卡片的最大宽度
                       height: '100%', // 控制卡片高度
                       display: 'flex',
@@ -663,11 +663,11 @@ function NormalDashboard() {
                       },
                     }}
                     onClick={() => {
-                      if (event.link) {
-                        window.open(event.link, '_blank');
-                      } else {
-                        navigate(`/events/${event.eventId}`);
-                      }
+                      //  if (event.link) {
+                      //    window.open(event.link, '_blank');
+                      //  } else {
+                      navigate(`/events/${event.eventId}`);
+                      //  }
                     }}
                   >
                     <CardContent sx={{ flex: '1 1 auto' }}>
@@ -729,7 +729,7 @@ function NormalDashboard() {
                     </CardContent>
                     <CardActions sx={{ justifyContent: 'space-between' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <IconButton className='button'onClick={(e) => { e.stopPropagation(); handleShareEvent(event); }}>
+                        <IconButton className='button' onClick={(e) => { e.stopPropagation(); handleShareEvent(event); }}>
                           <ShareIcon />
                         </IconButton>
                         <Typography variant="body2">Share</Typography>

@@ -32,6 +32,17 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
       console.error(error);
     }
   };
+  const handleCreateEventOpen = () => {
+    try {
+      if (userRole === 'admin') {
+        window.location.href = '/admin-dashboard';
+      } else {
+        window.location.href = '/registerforAdmin';
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleMenuOpen = (e) => {
     if (anchorEl) {
@@ -98,7 +109,14 @@ const TopNavBar = ({ isLoggedIn, userName, userRole, userEmail, anchorEl, open, 
             >
               kiwiboard.info
             </Typography>
-
+            <Button 
+                color="inherit" 
+                className="nav-button" 
+                onClick={handleCreateEventOpen} 
+                sx={{ fontSize: { xs: '0.75rem', sm: '1rem' }, padding: { xs: '4px 8px', sm: '10px 16px' }, marginRight: { xs: '8px', sm: '16px' } }}
+              >
+                Create Event
+              </Button>
             {/* 在小屏幕下，使用汉堡包菜单代替部分按钮 */}
             <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
               <IconButton edge="start" color="inherit" onClick={handleHamburgerMenuOpen}>

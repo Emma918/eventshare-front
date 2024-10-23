@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPageForNormal';
+import RegisterPageForAdmin from './pages/RegisterPageForAdmin';
 import AdminDashboard from './pages/AdminDashboard';
 import NormalDashboard from './pages/NormalDashboard';
 import HomePage from './pages/HomePage';  
@@ -28,6 +29,7 @@ function App() {
         {/* Login and Register routes */}
         <Route path="/login" element={<LoginPage setUserRole={setUserRole} />} /> {/* Pass down setUserRole */}
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/registerforAdmin" element={<RegisterPageForAdmin />} />
         <Route path="/homepage" element={<HomePage />} />
         <Route path="/normal-dashboard" element={<NormalDashboard />} />
         <Route path="/events/:eventId" element={<EventDetail />} />

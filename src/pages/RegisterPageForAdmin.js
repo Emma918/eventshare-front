@@ -1,36 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { Tabs, Tab, Box, TextField, Button, Typography, Container } from '@mui/material';
+import { Box, TextField, Button, Typography, Container } from '@mui/material';
 import axios from 'axios';
 import '../App.css';
 function RegisterPage() {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
-  const [selectedTab, setSelectedTab] = useState(0);  // 0 = Normal, 1 = Admin
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    window.fbAsyncInit = function () {
-      window.FB.init({
-        appId: 'YOUR_FACEBOOK_APP_ID',
-        cookie: true,
-        xfbml: true,
-        version: 'v12.0',
-      });
-    };
-
-    const script = document.createElement('script');
-    script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
-  const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
-  };
   const handleRegister = async () => {
     try {
       if (password !== confirmPassword) {
@@ -42,7 +21,7 @@ function RegisterPage() {
         setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.');
         return;
       }
-      const role = selectedTab === 0 ? 'normal' : 'admin';
+      const role = 'admin';
       await axios.post(`${apiBaseUrl}/auth/register`, { email, password, role });
       alert('Registration successful! Please login.');
       window.location.href = '/login';
@@ -54,21 +33,6 @@ function RegisterPage() {
       }
     }
   };
-  {/*
-  const handleGoogleSuccess = (response) => {
-    console.log('Google success', response);
-  };
-
-  const handleFacebookLogin = () => {
-    window.FB.login(function(response) {
-      console.log('Facebook login success', response);
-    }, { scope: 'public_profile,email' });
-  };
-
-  const handleAppleLogin = () => {
-    window.AppleID.auth.signIn();
-  };
-  */}
   return (
     <Container component="main" maxWidth="xs" sx={{ backgroundColor: 'white', padding: 2, borderRadius: 2, mt: 4 }}>
       <Box
@@ -80,14 +44,8 @@ function RegisterPage() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Register
+          Register for Admin
         </Typography>
-
-        <Tabs value={selectedTab} onChange={handleTabChange} aria-label="user type tabs">
-          <Tab label="Normal User" />
-          <Tab label="Admin User" />
-        </Tabs>
-
         <Box component="form" noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -144,32 +102,6 @@ function RegisterPage() {
             Sign Up
           </Button>
         </Box>
-        {/*
-        <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => console.log('Google Login Failed')}
-          />
-        </GoogleOAuthProvider>
-
-        <Button
-          fullWidth
-          variant="outlined"
-          sx={{ mt: 2 }}
-          onClick={handleFacebookLogin}
-        >
-          Sign in with Facebook
-        </Button>
-
-        <Button
-          fullWidth
-          variant="outlined"
-          sx={{ mt: 2 }}
-          onClick={handleAppleLogin}
-        >
-          Sign in with Apple
-        </Button>
-*/}
         <Typography variant="body2" sx={{ mt: 2 }}>
           Already have an account? <a href="/login">Sign in here</a>
         </Typography>

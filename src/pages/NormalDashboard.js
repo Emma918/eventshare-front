@@ -215,13 +215,13 @@ function NormalDashboard() {
   });
   // 当点击日历中的某个事件时，跳转到 EventDetail 页面
   const handleSelectEvent = (event) => {
-    if (event.link) {
+    //if (event.link) {
       // 如果 link 存在，则跳转到 link 对应的网页
-      window.open(event.link, '_blank');
-    } else {
+    //  window.open(event.link, '_blank');
+    //} else {
       // 如果 link 不存在，则跳转到 /events/${event.eventId}
       navigate(`/events/${event.eventId}`, { state: { viewMode: viewMode, from: 'NormalDashboard' } }); // 跳转到 eventId 对应的 EventDetail 页面
-    }
+    //}
 
   };
   useEffect(() => {

@@ -238,7 +238,7 @@ function HomePage() {
                     WebkitLineClamp: 4,
                     WebkitBoxOrient: 'vertical',
                   }}>
-                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.description) }} />
+                    <div dangerouslySetInnerHTML={{  __html: DOMPurify.sanitize(item.description.replace(/\n/g, '<br />')), }} />
                   </Typography>
                 </CardContent>
                 <CardActions className="card-actions">
